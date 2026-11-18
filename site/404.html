@@ -1,0 +1,9 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>أثر</title>
+<style>body{font-family:Tajawal,system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;background:#f4f8fa;color:#12323a;text-align:center}a{color:#1f7f8a}</style></head>
+<body><p id="m">جارٍ فتح الاستبانة…</p>
+<script>
+// رابط مختصر: /s/<رمز> يُحوَّل إلى نموذج الاستبانة (GitHub Pages لا يدعم المسارات الديناميكية، فنستعمل صفحة 404)
+(function () { var m = location.pathname.match(/^(.*)\/s\/([A-Za-z0-9-]{4,64})\/?$/);
+  if (m) { location.replace(m[1] + "/form.html?t=" + encodeURIComponent(m[2].toLowerCase())); return; }
+  document.getElementById("m").innerHTML = 'الصفحة غير موجودة. <a href="' + location.pathname.replace(/[^\/]*$/, "") + 'index.html">العودة إلى أثر</a>'; })();
+</script></body></html>

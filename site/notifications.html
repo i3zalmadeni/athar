@@ -4,5 +4,5 @@
 <body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script>
 <script>
-(async () => { if (!(await A.guard("notifications.html"))) return; ubPage(A.$("#app"), "أثر"); })();
+(async () => { if (!(await A.guard("notifications.html"))) return; ubPage(A.$("#app"), "أثر"); A.$("#app").insertAdjacentHTML("beforeend", '<p class="mt"><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>'); })();
 </script></body></html>

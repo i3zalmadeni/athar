@@ -16,6 +16,7 @@
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>', info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M14 9l2 2"/>', lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
     arrow: '<path d="M15 6l-6 6 6 6"/>',
+    edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>', chart: '<path d="M4 20V4M4 20h16"/><rect x="7" y="11" width="3" height="6" rx="1"/><rect x="12" y="7" width="3" height="10" rx="1"/><rect x="17" y="13" width="3" height="4" rx="1"/>',
   };
   const ico = (n) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ""}</svg>`;
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -28,7 +29,7 @@
     invalid_login_id: "معرّف الدخول: 3 إلى 40 خانة من أحرف إنجليزية صغيرة وأرقام و . _ - ويبدأ بحرف أو رقم.", weak_password: "كلمة المرور أقصر من الحد الأدنى.",
     invalid_link: "الرابط غير صالح أو منتهٍ. اطلب رابطاً جديداً من المدرسة.", rate_limited: "طلبات كثيرة من هذا الجهاز. حاول بعد قليل.", not_staff: "هذا الحساب غير مرتبط بسجل منسوب في النواة الرقمية.", core_inactive: "حسابك غير مفعّل في النواة الرقمية. راجع مدير النواة.",
     survey_not_closed: "تُنشأ الدراسة بعد إغلاق الاستبانة.", study_approved: "الدراسة معتمدة ولا تُعاد صياغتها.", insufficient_data: "عدد المشاركين أقل من الحد الأدنى لإنشاء دراسة.", survey_closed: "الاستبانة غير مفتوحة الآن.", already_submitted: "سبق أن شاركت في هذه الاستبانة.", not_draft: "لا يُعدَّل إلا على الاستبانة في وضع المسودة.",
-    invalid_input: "تحقق من البيانات المدخلة.", student_no_taken: "رقم الطالب مسجّل مسبقاً.", staff_not_found: "لم يُعثر على المنسوب في النواة الرقمية. تحقق من الرقم الوظيفي.",
+    invalid_slug: "الرابط من 4 إلى 30 خانة: أحرف إنجليزية صغيرة وأرقام وشرطة.", slug_taken: "هذا الرابط مستخدم، اختر رابطاً آخر.", invalid_input: "تحقق من البيانات المدخلة.", student_no_taken: "رقم الطالب مسجّل مسبقاً.", staff_not_found: "لم يُعثر على المنسوب في النواة الرقمية. تحقق من الرقم الوظيفي.",
     core_already_linked: "هذا المنسوب لديه حساب في أثر مسبقاً.", core_unavailable: "تعذّر الاتصال بالنواة الرقمية الآن. حاول لاحقاً.", employee_no_required: "أدخل الرقم الوظيفي.",
     register_failed: "تعذّر إنشاء الحساب.", server_error: "حدث خطأ في الخادم. حاول مرة أخرى.", required_kind: "إشعارات حالة الحساب إلزامية.", role_required: "اختر دوراً واحداً على الأقل.",
     invalid_role: "الدور غير مناسب لنوع الحساب.", invalid_value: "القيمة غير صالحة.", network: "تعذّر الاتصال بالخادم.",
@@ -51,7 +52,7 @@
   const brand = (href) => `<a class="bm" href="${href}">${MARK("lgh")}<span><b>أثر</b><small>${esc(C.schoolName)}</small></span></a>`;
   const headMoe = '<span class="moe hm"><b>وزارة التعليم</b><small>Ministry of Education</small></span>';
   const FOOTER = `<footer class="uf credit"><div class="wrap uf-in"><span class="uf-moe"><b>وزارة التعليم</b><small>Ministry of Education</small></span><div class="uf-mid"><b>مدرسة لبيد بن ربيعة المتوسطة</b><span>مدير المدرسة: خالد بن عبدالرحمن الباش</span><span>أثر · النواة الرقمية – 1448هـ</span></div><div class="uf-end"><div class="uf-card"><svg class="uf-mark" viewBox="0 0 48 48" aria-hidden="true"><circle class="bg" cx="24" cy="24" r="21"/><circle class="ring" cx="24" cy="24" r="15"/><text class="t" x="24" y="31" text-anchor="middle">ع</text><circle class="dot" cx="39" cy="10" r="4.5"/></svg><span class="uf-txt"><small>أحد منتجات</small><b>مختبر الأفكار — عبدالعزيز المديني <i class="uf-ai">AI</i></b></span><span class="uf-sep" aria-hidden="true"></span><span class="uf-links"><a href="https://i3zalmadeni.netlify.app/me" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>تعرّف عليّ</a><a href="https://i3zalmadeni.netlify.app/projects" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>كيف بُني المشروع</a></span></div></div></div></footer>`;
-  const PAGES = { "dashboard.html": ["مكتبي الإلكتروني", "grid", "استباناتك ودراساتك وما يخصك في أثر"], "survey.html": ["الاستبانة", "grid", "عبّئ الاستبانة المطلوبة"], "survey-results.html": ["نتائج الاستبانة", "grid", "النتائج المجمّعة"], "study.html": ["الدراسة", "grid", "تقرير الدراسة وتوصياتها"], "admin.html": ["الإدارة", "shield", "الاستبانات والدراسات والصلاحيات وسجل العمليات"], "profile.html": ["حسابي", "user", "بياناتك وإعداداتك وسجل نشاطك"], "notifications.html": ["الإشعارات", "bell", "تنبيهات حسابك وطلباتك"] };
+  const PAGES = { "dashboard.html": ["مكتبي الإلكتروني", "grid", "استباناتك ودراساتك وما يخصك في أثر"], "survey.html": ["الاستبانة", "grid", "عبّئ الاستبانة المطلوبة"], "survey-results.html": ["نتائج الاستبانة", "grid", "النتائج المجمّعة"], "study.html": ["الدراسة", "grid", "تقرير الدراسة وتوصياتها"], "surveys-admin.html": ["إدارة الاستبانات", "edit", "إنشاء الاستبانات ونشرها وروابطها وإغلاقها"], "studies-admin.html": ["إدارة الدراسات", "chart", "نتائج الاستبانات الجارية والمغلقة والتقارير والتوصيات"], "admin.html": ["الإدارة", "shield", "الحسابات والصلاحيات وسجل العمليات والإعدادات"], "notifications.html": ["الإشعارات", "bell", "تنبيهات حسابك وطلباتك"] };
   const PUB_NAV = [["index.html", "الرئيسية", "home"], ["about.html", "عن أثر", "info"], ["help.html", "المساعدة", "help"]];
   const BELL = '<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21a2 2 0 0 0 4 0"/>';
   const svg = (p) => `<svg class="ub-i" viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
@@ -64,14 +65,14 @@
         <nav id="nv">${PUB_NAV.map(([h, t, i]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""}>${ico(i)}${t}</a>`).join("")}<a href="${me ? "dashboard.html" : "login.html"}" class="${active === "login.html" ? "on" : ""}">${ico("grid")}${me ? "لوحة التحكم" : "دخول المنسوبين"}</a></nav>${headMoe}</div></header>`;
       $("#nt").onclick = () => { const o = $("#nv").classList.toggle("open"); $("#nt").setAttribute("aria-expanded", o); };
     } else {
-      const adm = me.status === "active" && me.permissions.length > 0;
-      const TABKEY = { "survey.html": "dashboard.html", "survey-results.html": "dashboard.html", "study.html": "dashboard.html" }, on = TABKEY[active] || active;
-      const tabs = [["dashboard.html"], ...(adm ? [["admin.html"]] : []), ["profile.html"], ["notifications.html"]];
+      const act = me.status === "active", sm = act && can("surveys:manage"), adm = act && ["accounts:view","roles:manage","audit:view","settings:manage","integration:view"].some(can);
+      const TABKEY = { "survey.html": "dashboard.html", "survey-results.html": "studies-admin.html", "study.html": sm ? "studies-admin.html" : "dashboard.html", "notifications.html": "dashboard.html" }, on = TABKEY[active] || active;
+      const tabs = [["dashboard.html"], ...(sm ? [["surveys-admin.html"], ["studies-admin.html"]] : []), ...(adm ? [["admin.html"]] : [])];
       const cur = PAGES[active], roles = me.roles.map((r) => r.name_ar).join("، ");
       $("#hdr").innerHTML = `<header class="dash"><div class="wrap top">${brand("dashboard.html")}<div class="idl"><a class="sitelink" href="index.html">الموقع الإلكتروني</a>${headMoe}</div></div><div class="strip" aria-hidden="true"></div>
         <div class="dnav"><div class="wrap dn"><button type="button" class="dmb" id="dmb" aria-expanded="false" aria-controls="dnavIn">${ico("menu")}<span class="dmb-t">القائمة</span></button>
-        <div class="dnav-in" id="dnavIn">${tabs.map(([h]) => `<a href="${h}" class="${h === on ? "on" : ""}" ${h === on ? 'aria-current="page"' : ""}>${ico(PAGES[h][1])}${PAGES[h][0]}${h === "notifications.html" && me.unread ? `<span class="bdg">${me.unread}</span>` : ""}</a>`).join("")}</div>
-        <div class="dwho">${ubBarHTML(me.display_name, "profile.html")}</div></div></div></header>
+        <div class="dnav-in" id="dnavIn">${tabs.map(([h]) => `<a href="${h}" class="${h === on ? "on" : ""}" ${h === on ? 'aria-current="page"' : ""}>${ico(PAGES[h][1])}${PAGES[h][0]}</a>`).join("")}</div>
+        <div class="dwho">${ubBarHTML(me.display_name, "dashboard.html")}</div></div></div></header>
         <div class="pagebar"><div class="wrap pb"><div class="pb-t"><small>${esc(roles)}</small><h1>${cur[0]}</h1></div><p class="pb-d">${cur[2]}</p></div></div>`;
       const d = $(".dnav"), b = $("#dmb"); const set = (o) => { d.classList.toggle("open", o); b.setAttribute("aria-expanded", o); };
       b.onclick = (e) => { e.stopPropagation(); set(!d.classList.contains("open")); }; document.addEventListener("click", (e) => { if (!d.contains(e.target)) set(false); });

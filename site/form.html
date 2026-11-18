@@ -12,7 +12,7 @@
   if (!info || !info.valid) { card('<h2>الاستبانة غير متاحة</h2><div class="alert bad">الرابط غير صالح أو أن الاستبانة أُغلقت. اطلب رابطاً جديداً من المدرسة.</div>'); return; }
   const AUD = { student: "المتعلم", parent: "ولي الأمر", supervisor: "الجهة المشرفة" };
   const q = (x, i) => `<div class="qcard" data-q="${x.id}" data-k="${x.kind}"><h4>${i + 1}. ${esc(x.prompt)} ${x.required ? '<span class="badge warn">مطلوب</span>' : ""}</h4>` +
-    (x.kind === "scale" ? `<div class="scale">${[1,2,3,4,5].map((n) => `<label><input type="radio" name="q${i}" value="${n}">${n}</label>`).join("")}</div><small class="hint">1 = غير موافق بشدة، 5 = موافق بشدة</small>`
+    (x.kind === "scale" ? `<div class="scale">${(x.options || ["1","2","3","4"]).map((t, n) => `<label><input type="radio" name="q${i}" value="${n + 1}">${esc(t)}</label>`).join("")}</div>`
     : x.kind === "choice" ? `<div class="scale">${x.options.map((o, k) => `<label><input type="radio" name="q${i}" value="${k}">${esc(o)}</label>`).join("")}</div>`
     : `<textarea name="q${i}" maxlength="1000" rows="3" placeholder="اكتب رأيك"></textarea>`) + "</div>";
   card(`<h2>${esc(info.title)}</h2><p class="sub">${esc(A.C.schoolName)} · ${AUD[info.audience] || ""}</p>${info.description ? `<p>${esc(info.description)}</p>` : ""}

@@ -7,16 +7,16 @@
 (async () => { if (!(await A.guard("survey-results.html"))) return; const { esc, rpc, $, fmt, msg } = A;
 const id = new URLSearchParams(location.search).get("id");
 let r; try { r = await rpc("survey_results", { p_id: id }); } catch (x) { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div><p><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>`; return; }
-const s = r.survey, back = '<p class="mt"><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>';
+const s = r.survey, back = '<p class="mt"><a class="btn sec" href="studies-admin.html">العودة إلى إدارة الدراسات</a></p>';
 if (r.hidden) { $("#app").innerHTML = `<h2>${esc(s.title)}</h2><div class="alert info">لا تُعرض النتائج قبل أن يبلغ المشاركون ${r.min}، حماية لخصوصية المشاركين. المشاركون الآن: ${r.participants}.</div>${back}`; return; }
 const bar = (l, v, t) => `<div class="r"><span>${esc(l)}</span><span class="t"><i style="width:${Math.min(100, v)}%"></i></span><b>${t}</b></div>`;
 const item = (x, i) => `<div class="qcard"><h4>${i + 1}. ${esc(x.prompt)}</h4>` + (x.kind === "scale"
-  ? `<p class="hint">المتوسط <b>${x.mean ?? "—"}</b> من 5 · موافقون ${x.favorable_pct ?? 0}% · غير موافقين ${x.unfavorable_pct ?? 0}% · أجاب ${x.answered}</p><div class="bars">${x.dist.map((c, k) => bar(String(k + 1), x.answered ? (100 * c / x.answered) : 0, c)).join("")}</div>`
+  ? `<p class="hint">المتوسط <b>${x.mean ?? "—"}</b> من 4 · موافقون ${x.favorable_pct ?? 0}% · غير موافقين ${x.unfavorable_pct ?? 0}% · أجاب ${x.answered}</p><div class="bars">${x.dist.map((c, k) => bar((x.options && x.options[k]) || String(k + 1), x.answered ? (100 * c / x.answered) : 0, c)).join("")}</div>`
   : x.kind === "choice" ? `<div class="bars">${x.options.map((o) => bar(o.label, o.pct, `${o.count} (${o.pct}%)`)).join("")}</div>`
   : `<p class="hint">${x.answered} إجابة نصية. تُعرض نصوصها لمن له صلاحية إدارة الاستبانات فقط.</p>${(x.texts || []).map((t) => `<div class="item">${esc(t)}</div>`).join("")}`) + "</div>";
 const meanOf = r.items.filter((x) => x.kind === "scale" && x.mean != null).map((x) => Number(x.mean)), overall = meanOf.length ? (meanOf.reduce((a, b) => a + b, 0) / meanOf.length).toFixed(2) : "—";
 $("#app").innerHTML = `<h2>${esc(s.title)}</h2>${s.description ? `<p class="sub">${esc(s.description)}</p>` : ""}
-<div class="grid"><div class="stat"><b>${r.participants}</b><span>مشاركاً</span></div><div class="stat"><b>${r.rate_pct != null ? r.rate_pct + "%" : "—"}</b><span>${r.eligible ? "نسبة المشاركة من " + r.eligible : "نسبة المشاركة (حدد العدد المستهدف)"}</span></div><div class="stat"><b>${overall}</b><span>المتوسط العام من 5</span></div></div>
-<p class="mt"><a class="btn sec" href="admin.html#studies">الدراسات والتقارير</a></p>
+<div class="grid"><div class="stat"><b>${r.participants}</b><span>مشاركاً</span></div><div class="stat"><b>${r.rate_pct != null ? r.rate_pct + "%" : "—"}</b><span>${r.eligible ? "نسبة المشاركة من " + r.eligible : "نسبة المشاركة (حدد العدد المستهدف)"}</span></div><div class="stat"><b>${overall}</b><span>المتوسط العام من 4</span></div></div>
+<p class="mt"><a class="btn sec" href="studies-admin.html">إدارة الدراسات</a></p>
 <h3 class="sec">النتائج التفصيلية</h3>${r.items.map(item).join("")}${back}`; })();
 </script></body></html>

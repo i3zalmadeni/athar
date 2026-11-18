@@ -18,7 +18,7 @@ const pend = S.pending.length ? S.pending.map((x) => `<div class="sv ${x.require
 const part = S.participated.length ? S.participated.map((x) => `<div class="sv"><div class="row2"><b>${esc(x.title)}</b>${x.study_ready ? '<span class="badge ok">الدراسة معتمدة</span>' : '<span class="badge">بانتظار الدراسة</span>'}</div>
   <div class="row2"><span class="hint">شاركت ${fmt(x.submitted_at)}</span>${x.study_ready ? `<a class="btn sm sec" href="study.html?id=${x.study_id}">الدراسة والتوصيات</a>` : ""}</div></div>`).join("")
   : '<div class="empty">لم تشارك في دراسات بعد. تظهر هنا الاستبانات التي تعبّئها، ثم دراستها وتوصياتها بعد اعتمادها.</div>';
-const cards = [["open_surveys","استبانات مفتوحة","admin.html#surveys"],["draft_surveys","استبانات مسودة","admin.html#surveys"],["responses","إجمالي الاستجابات","admin.html#surveys"],["studies_pending","دراسات بانتظار الاعتماد","admin.html#studies"],["staff_accounts","حسابات المنسوبين الفعّالة","admin.html#accounts"]].filter(([k]) => d[k] != null);
+const cards = [["open_surveys","استبانات مفتوحة","surveys-admin.html"],["draft_surveys","استبانات مسودة","surveys-admin.html"],["responses","إجمالي الاستجابات","surveys-admin.html"],["studies_pending","دراسات بانتظار الاعتماد","studies-admin.html"],["staff_accounts","حسابات المنسوبين الفعّالة","admin.html#accounts"]].filter(([k]) => d[k] != null);
 $("#app").innerHTML = `<div class="two"><section><h3 class="sec">استبانات تنتظرك</h3>${pend}</section><section><h3 class="sec">دراسات شاركت بها</h3>${part}</section></div>`
  + (cards.length ? `<h3 class="sec">نظرة إدارية سريعة</h3><div class="grid">${cards.map(([k,t,h]) => `<a class="stat" href="${h}" style="text-decoration:none"><b>${d[k]}</b><span>${t}</span></a>`).join("")}</div>` : ""); })();
 </script></body></html>
