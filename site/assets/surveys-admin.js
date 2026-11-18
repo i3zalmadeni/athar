@@ -20,27 +20,34 @@ const dir = () => location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
   let L = [], open_ = null; const cache = {};
   const AICON = { student: "users", teacher: "school", administrative: "shield", supervisor: "info", parent: "user" };
   const pct = (x) => { const t = x.target_count; return t ? Math.min(100, Math.round(100 * (x.round_responses ?? x.responses) / t)) : null; };
-  const card = (x) => { const p = pct(x), pub = PUB.includes(x.audience), isOpen = open_ === x.id;
-    return `<article class="scard ${x.status} ${isOpen ? "ex" : ""}" data-id="${x.id}"><div class="sc-h" data-t="${x.id}" role="button" tabindex="0" aria-expanded="${isOpen}">
-      <span class="sc-i">${A.ico(AICON[x.audience])}</span><div class="sc-m"><b>${esc(x.title)}</b><small>${AUD[x.audience]} · ${x.questions} أسئلة${x.round > 1 ? " · الجولة " + x.round : ""}</small></div><span class="badge ${ST[x.status][1]}">${ST[x.status][0]}</span></div>
-      <div class="sc-s"><div><b>${x.round > 1 ? x.round_responses : x.responses}</b><span>${x.round > 1 ? "في هذه الجولة" : "استجابة"}${x.target_count ? " من " + x.target_count : ""}${x.round > 1 ? " · الإجمالي " + x.responses : ""}</span></div>${p !== null ? `<div class="prog" aria-label="${p}%"><i style="width:${p}%"></i></div><em>${p}%</em>` : ""}</div>
-      ${pub && x.token && x.status !== "closed" ? `<div class="sc-l"><code dir="ltr">${esc(dir().replace(/^https?:\/\//, ""))}s/${esc(x.token)}</code><button class="btn sm sec" data-cp="${x.id}">نسخ</button></div>` : ""}
-      <div class="sc-a">${x.status === "draft" ? `<button class="btn sm" data-o="${x.id}">فتح للتعبئة</button><button class="btn sm sec" data-e="${x.id}">تعديل</button>` : ""}${x.status !== "closed" ? `<button class="btn sm sec" data-p="${x.id}">نشر ومشاركة</button>` : ""}${x.status === "open" ? `<button class="btn sm bad" data-c="${x.id}">إغلاق</button>` : ""}${x.status === "closed" ? `<button class="btn sm" data-ro="${x.id}">إعادة فتح</button>` : ""}${x.status !== "draft" ? `<a class="btn sm sec" href="${x.study_id ? "study.html?id=" + x.study_id : "studies-admin.html"}">النتائج والدراسة</a>` : ""}${x.status === "draft" ? `<button class="btn sm bad" data-x="${x.id}">حذف</button>` : ""}</div>
-      ${isOpen ? `<div class="sc-q" id="q-${x.id}"><span class="spin"></span></div>` : ""}</article>`; };
+  const AC = { student: "#2f8f99", teacher: "#0c6f82", administrative: "#7a6bbf", supervisor: "#d98a2b", parent: "#2e9e6b" };
+  const card = (x, i) => { const p = pct(x), pub = PUB.includes(x.audience), isOpen = open_ === x.id, n = x.round > 1 ? x.round_responses : x.responses;
+    const main = x.status === "draft" ? `<button class="btn sm" data-o="${x.id}">فتح للتعبئة</button>` : x.status === "open" ? `<button class="btn sm" data-p="${x.id}">نشر ومشاركة</button>` : `<button class="btn sm" data-ro="${x.id}">إعادة فتح</button>`;
+    return `<article class="axc ${x.status} ${isOpen ? "ex" : ""}" data-id="${x.id}" style="--ac:${AC[x.audience]};animation-delay:${Math.min(i, 9) * 45}ms">
+      <div class="ax-h" data-t="${x.id}" role="button" tabindex="0" aria-expanded="${isOpen}"><span class="ax-i">${A.ico(AICON[x.audience])}</span>
+        <div class="ax-m"><b>${esc(x.title)}</b><small>${AUD[x.audience]} · ${x.questions} أسئلة${x.round > 1 ? " · الجولة " + x.round : ""}</small></div>
+        <span class="ax-st ${x.status}"><i></i>${ST[x.status][0]}</span></div>
+      <div class="ax-s"><div class="ax-n"><b>${n}</b><span>${x.round > 1 ? "في هذه الجولة" : "استجابة"}${x.target_count ? " من " + x.target_count : ""}</span></div>
+        ${p !== null ? `<div class="ax-pg" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p}%"></i></div><em>${p}%</em>` : '<div class="ax-pg off"><i></i></div><em>بلا هدف</em>'}</div>
+      ${x.round > 1 ? `<div class="ax-r">الإجمالي عبر الجولات: ${x.responses}</div>` : ""}
+      ${pub && x.token && x.status !== "closed" ? `<div class="ax-l"><code dir="ltr">${esc(dir().replace(/^https?:\/\//, ""))}s/${esc(x.token)}</code><button class="btn sm sec" data-cp="${x.id}">نسخ</button></div>` : ""}
+      <div class="ax-a">${main}${x.status !== "draft" ? `<a class="btn sm sec" href="${x.study_id ? "study.html?id=" + x.study_id : "studies-admin.html"}">${x.status === "open" ? "النتائج الحية" : "الدراسة"}</a>` : `<button class="btn sm sec" data-e="${x.id}">تعديل</button>`}
+        <span class="ax-sp"></span>${x.status === "open" ? `<button class="ax-g bad" data-c="${x.id}">إغلاق</button>` : ""}${x.status === "draft" ? `<button class="ax-g bad" data-x="${x.id}">حذف</button>` : ""}<button class="ax-g" data-t2="${x.id}" aria-label="عرض الأسئلة">${isOpen ? "إخفاء الأسئلة" : "الأسئلة"}</button></div>
+      ${isOpen ? `<div class="ax-q" id="q-${x.id}"><span class="spin"></span></div>` : ""}</article>`; };
   function paint() {
     const base = L.filter((x) => (F.s === "all" || x.status === F.s) && (!F.q || (x.title + AUD[x.audience]).includes(F.q))), rows = base.filter((x) => F.a === "all" || x.audience === F.a);
     const cnt = (a) => L.filter((x) => (a === "all" || x.audience === a) && (F.s === "all" || x.status === F.s) && (!F.q || (x.title + AUD[x.audience]).includes(F.q))).length;
     const sc = (st) => L.filter((x) => st === "all" || x.status === st).length;
     $("#lst").innerHTML = `<div class="seg" role="tablist" aria-label="الفئة">${["all", ...Object.keys(AUD)].map((a) => `<button role="tab" aria-selected="${F.a === a}" data-a="${a}" class="${F.a === a ? "on" : ""}">${a === "all" ? "كل الفئات" : AUD[a]}<span>${cnt(a)}</span></button>`).join("")}</div>
       <div class="bar"><input id="q" type="search" placeholder="بحث في الاستبانات" value="${esc(F.q)}" style="flex:1;min-width:180px"><div class="chips">${[["all", "الكل"], ["draft", "مسودة"], ["open", "مفتوحة"], ["closed", "مغلقة"]].map(([k, n]) => `<button data-s="${k}" class="${F.s === k ? "on" : ""}">${n} <span>${sc(k)}</span></button>`).join("")}</div></div>
-      ${rows.length ? `<div class="sgrid">${rows.map(card).join("")}</div>` : `<div class="empty">لا توجد استبانات مطابقة. ${F.a !== "all" ? `<button class="btn sm" id="nn">إنشاء استبانة ${AUD[F.a]}</button>` : ""}</div>`}`;
+      ${rows.length ? `<div class="axg">${rows.map(card).join("")}</div>` : `<div class="empty">لا توجد استبانات مطابقة. ${F.a !== "all" ? `<button class="btn sm" id="nn">إنشاء استبانة ${AUD[F.a]}</button>` : ""}</div>`}`;
     document.querySelectorAll("[data-a]").forEach((b) => b.onclick = () => { F.a = b.dataset.a; history.replaceState(null, "", "#" + F.a); paint(); });
     document.querySelectorAll("[data-s]").forEach((b) => b.onclick = () => { F.s = b.dataset.s; paint(); });
     const q = $("#q"); q.oninput = () => { F.q = q.value.trim(); const pos = q.selectionStart; paint(); const n = $("#q"); n.focus(); n.setSelectionRange(pos, pos); };
     const nn = $("#nn"); if (nn) nn.onclick = () => builder(null, F.a);
     const by = (id) => L.find((x) => x.id === id);
     document.querySelectorAll("[data-t]").forEach((h) => { const go = async () => { const id = h.dataset.t; open_ = open_ === id ? null : id; paint(); if (open_) preview(open_); }; h.onclick = go; h.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }; });
-    document.querySelectorAll(".sc-a,.sc-l").forEach((e) => e.onclick = (ev) => ev.stopPropagation());
+    document.querySelectorAll("[data-t2]").forEach((h) => h.onclick = () => { open_ = open_ === h.dataset.t2 ? null : h.dataset.t2; paint(); if (open_) preview(open_); });
     document.querySelectorAll("[data-cp]").forEach((b) => b.onclick = () => copy(shortLink(by(b.dataset.cp))));
     document.querySelectorAll("[data-e]").forEach((b) => b.onclick = () => builder(b.dataset.e));
     document.querySelectorAll("[data-p]").forEach((b) => b.onclick = () => share(by(b.dataset.p)));
@@ -69,7 +76,8 @@ const dir = () => location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
     for (const k in cache) delete cache[k];
     if (!$("#lst")) { $("#app").innerHTML = `<div id="sum"></div><div id="lst"></div>`; }
     const n = (f) => L.filter(f).length;
-    $("#sum").innerHTML = `<div class="grid"><div class="stat"><b>${L.length}</b><span>استبانات</span></div><div class="stat"><b>${n((x) => x.status === "open")}</b><span>مفتوحة الآن</span></div><div class="stat"><b>${n((x) => x.status === "draft")}</b><span>مسودات</span></div><div class="stat"><b>${L.reduce((a, x) => a + x.responses, 0)}</b><span>إجمالي الاستجابات</span></div></div><div class="bar"><button class="btn" id="ns">استبانة جديدة</button></div>`;
+    const IC = { all: "grid", open: "check", draft: "edit", n: "chart" }, tot = L.reduce((a, x) => a + x.responses, 0);
+    $("#sum").innerHTML = `<div class="axs">${[[L.length, "استبانات", "grid", "#0c6f82"], [n((x) => x.status === "open"), "مفتوحة الآن", "bell", "#2e9e6b"], [n((x) => x.status === "draft"), "مسودات", "edit", "#d98a2b"], [tot, "إجمالي الاستجابات", "chart", "#7a6bbf"]].map(([v, l, i, c], k) => `<div class="axs-i" style="--ac:${c};animation-delay:${k * 60}ms"><span>${A.ico(i)}</span><div><b>${v}</b><small>${l}</small></div></div>`).join("")}<button class="btn axs-b" id="ns">${A.ico("edit")}استبانة جديدة</button></div>`;
     $("#ns").onclick = () => builder(null, F.a !== "all" ? F.a : null);
     paint();
   }
