@@ -18,7 +18,7 @@ const SV = (() => {
   const AUD = { student: "المتعلم", parent: "ولي الأمر", supervisor: "الجهة المشرفة", teacher: "المعلم", administrative: "الهيئة الإدارية" };
   const q = (x, i) => `<section class="qc" data-q="${x.id}" data-k="${x.kind}" style="animation-delay:${Math.min(i, 8) * 40}ms"><div class="qh"><span class="qn">${i + 1}</span><h4>${esc(x.prompt)}${x.required ? '<em class="rq" title="مطلوب">*</em>' : ""}</h4></div>` +
     (x.kind === "text" ? `<textarea name="q${i}" maxlength="1000" rows="3" placeholder="اكتب رأيك (اختياري)"></textarea>`
-      : `<div class="opts">${(x.kind === "scale" ? (x.options || ["1", "2", "3", "4"]) : x.options).map((t, n) => `<label class="op"><input type="radio" name="q${i}" value="${x.kind === "scale" ? n + 1 : n}"><span class="ov"><i>${x.kind === "scale" ? n + 1 : ""}</i><b>${esc(t)}</b></span></label>`).join("")}</div>`) + "</section>";
+      : `<div class="opts">${(x.kind === "scale" ? (x.options || ["1", "2", "3", "4"]) : x.options).map((t, n) => `<label class="op"><input type="radio" name="q${i}" value="${x.kind === "scale" ? n + 1 : n}"><span class="ob"><i>${x.kind === "scale" ? n + 1 : ""}</i><b>${esc(t)}</b></span></label>`).join("")}</div>`) + "</section>";
   // root: العنصر؛ info: {title, description, audience, questions}؛ o: {school, contact, preview, submit(ans, extra)}
   function render(root, info, o) {
     const aud = info.audience, m = MSG[aud] || MSG.teacher, n = info.questions.length;

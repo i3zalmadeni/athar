@@ -151,10 +151,10 @@ main#app.wrap{padding-top:22px;padding-bottom:12px}
 .qc{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px;animation:scIn .4s both;transition:box-shadow .2s,border-color .2s}.qc.miss{border-color:#d9534f;box-shadow:0 0 0 3px #d9534f33}
 .qh{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}.qn{flex:none;width:30px;height:30px;border-radius:10px;background:#e3f3f5;color:#0c6f82;font-weight:800;display:grid;place-items:center}.qh h4{margin:3px 0 0;font-size:1.02rem;line-height:1.7}.rq{color:#d9534f;font-style:normal;margin-inline-start:4px}
 .opts{display:grid;gap:8px}.op{display:block;cursor:pointer}.op{position:relative}.op input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;inset:0}
-.op .ov{display:flex;align-items:center;gap:12px;min-height:52px;padding:10px 14px;border:1.5px solid var(--line);border-radius:14px;background:#fafdfd;transition:.18s}
-.op .ov i{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid #b7d3d8;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:.85rem;color:#5b7f86;transition:.18s}.op .ov b{font-weight:600;line-height:1.6}
-.op:hover .ov{border-color:#18a4ab}.op input:focus-visible+.ov{outline:3px solid #f0b34a;outline-offset:2px}
-.op input:checked+.ov{border-color:#0c6f82;background:#e3f6f7;transform:scale(1.01)}.op input:checked+.ov i{background:#0c6f82;border-color:#0c6f82;color:#fff}
+.op .ob{display:flex;align-items:center;gap:12px;min-height:52px;padding:10px 14px;border:1.5px solid var(--line);border-radius:14px;background:#fafdfd;transition:.18s}
+.op .ob i{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid #b7d3d8;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:.85rem;color:#5b7f86;transition:.18s}.op .ob b{font-weight:600;line-height:1.6}
+.op:hover .ob{border-color:#18a4ab}.op input:focus-visible+.ob{outline:3px solid #f0b34a;outline-offset:2px}
+.op input:checked+.ob{border-color:#0c6f82;background:#e3f6f7;transform:scale(1.01)}.op input:checked+.ob i{background:#0c6f82;border-color:#0c6f82;color:#fff}
 @media (min-width:700px){.opts{grid-template-columns:repeat(2,1fr)}}
 .qc textarea{width:100%;font-size:1rem}.qc input[type=text],.qc input[type=email],.qc input:not([type=radio]){font-size:16px}
 .svc{background:linear-gradient(135deg,#eef8fa,#fff6e3);border-radius:18px;padding:14px 18px;text-align:center;margin:16px 0;line-height:1.9;font-weight:600;color:#0c4f5c}.svc p{margin:0}
