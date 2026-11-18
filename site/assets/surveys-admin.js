@@ -19,13 +19,13 @@ const dir = () => location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
   const F = { a: (location.hash.slice(1).split("&")[0] || "all"), s: "all", q: "" }; if (F.a !== "all" && !AUD[F.a]) F.a = "all";
   let L = [], open_ = null; const cache = {};
   const AICON = { student: "users", teacher: "school", administrative: "shield", supervisor: "info", parent: "user" };
-  const pct = (x) => { const t = x.target_count; return t ? Math.min(100, Math.round(100 * x.responses / t)) : null; };
+  const pct = (x) => { const t = x.target_count; return t ? Math.min(100, Math.round(100 * (x.round_responses ?? x.responses) / t)) : null; };
   const card = (x) => { const p = pct(x), pub = PUB.includes(x.audience), isOpen = open_ === x.id;
     return `<article class="scard ${x.status} ${isOpen ? "ex" : ""}" data-id="${x.id}"><div class="sc-h" data-t="${x.id}" role="button" tabindex="0" aria-expanded="${isOpen}">
-      <span class="sc-i">${A.ico(AICON[x.audience])}</span><div class="sc-m"><b>${esc(x.title)}</b><small>${AUD[x.audience]} · ${x.questions} أسئلة</small></div><span class="badge ${ST[x.status][1]}">${ST[x.status][0]}</span></div>
-      <div class="sc-s"><div><b>${x.responses}</b><span>استجابة${x.target_count ? " من " + x.target_count : ""}</span></div>${p !== null ? `<div class="prog" aria-label="${p}%"><i style="width:${p}%"></i></div><em>${p}%</em>` : ""}</div>
+      <span class="sc-i">${A.ico(AICON[x.audience])}</span><div class="sc-m"><b>${esc(x.title)}</b><small>${AUD[x.audience]} · ${x.questions} أسئلة${x.round > 1 ? " · الجولة " + x.round : ""}</small></div><span class="badge ${ST[x.status][1]}">${ST[x.status][0]}</span></div>
+      <div class="sc-s"><div><b>${x.round > 1 ? x.round_responses : x.responses}</b><span>${x.round > 1 ? "في هذه الجولة" : "استجابة"}${x.target_count ? " من " + x.target_count : ""}${x.round > 1 ? " · الإجمالي " + x.responses : ""}</span></div>${p !== null ? `<div class="prog" aria-label="${p}%"><i style="width:${p}%"></i></div><em>${p}%</em>` : ""}</div>
       ${pub && x.token && x.status !== "closed" ? `<div class="sc-l"><code dir="ltr">${esc(dir().replace(/^https?:\/\//, ""))}s/${esc(x.token)}</code><button class="btn sm sec" data-cp="${x.id}">نسخ</button></div>` : ""}
-      <div class="sc-a">${x.status === "draft" ? `<button class="btn sm" data-o="${x.id}">فتح للتعبئة</button><button class="btn sm sec" data-e="${x.id}">تعديل</button>` : ""}${x.status !== "closed" ? `<button class="btn sm sec" data-p="${x.id}">نشر ومشاركة</button>` : ""}${x.status === "open" ? `<button class="btn sm bad" data-c="${x.id}">إغلاق</button>` : ""}${x.status !== "draft" ? `<a class="btn sm sec" href="studies-admin.html">النتائج والدراسة</a>` : ""}${x.status === "draft" ? `<button class="btn sm bad" data-x="${x.id}">حذف</button>` : ""}</div>
+      <div class="sc-a">${x.status === "draft" ? `<button class="btn sm" data-o="${x.id}">فتح للتعبئة</button><button class="btn sm sec" data-e="${x.id}">تعديل</button>` : ""}${x.status !== "closed" ? `<button class="btn sm sec" data-p="${x.id}">نشر ومشاركة</button>` : ""}${x.status === "open" ? `<button class="btn sm bad" data-c="${x.id}">إغلاق</button>` : ""}${x.status === "closed" ? `<button class="btn sm" data-ro="${x.id}">إعادة فتح</button>` : ""}${x.status !== "draft" ? `<a class="btn sm sec" href="${x.study_id ? "study.html?id=" + x.study_id : "studies-admin.html"}">النتائج والدراسة</a>` : ""}${x.status === "draft" ? `<button class="btn sm bad" data-x="${x.id}">حذف</button>` : ""}</div>
       ${isOpen ? `<div class="sc-q" id="q-${x.id}"><span class="spin"></span></div>` : ""}</article>`; };
   function paint() {
     const base = L.filter((x) => (F.s === "all" || x.status === F.s) && (!F.q || (x.title + AUD[x.audience]).includes(F.q))), rows = base.filter((x) => F.a === "all" || x.audience === F.a);
@@ -45,9 +45,19 @@ const dir = () => location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
     document.querySelectorAll("[data-e]").forEach((b) => b.onclick = () => builder(b.dataset.e));
     document.querySelectorAll("[data-p]").forEach((b) => b.onclick = () => share(by(b.dataset.p)));
     document.querySelectorAll("[data-o]").forEach((b) => b.onclick = async () => { if (confirm("تُفتح الاستبانة للتعبئة" + (PUB.includes(by(b.dataset.o).audience) ? "" : " ويُشعَر المعنيون من المنسوبين") + ". متابعة؟") && await act(() => rpc("admin_set_survey_status", { p_id: b.dataset.o, p_status: "open" }), "فُتحت الاستبانة")) { await load(); const x = by(b.dataset.o); if (x) share(x); } });
+    document.querySelectorAll("[data-ro]").forEach((b) => b.onclick = () => reopen(by(b.dataset.ro)));
     document.querySelectorAll("[data-c]").forEach((b) => b.onclick = async () => { if (confirm("بعد الإغلاق لا تقبل إجابات ويتوقف الرابط. متابعة؟") && await act(() => rpc("admin_set_survey_status", { p_id: b.dataset.c, p_status: "closed" }), "أُغلقت الاستبانة")) load(); });
     document.querySelectorAll("[data-x]").forEach((b) => b.onclick = async () => { if (confirm("حذف المسودة نهائياً؟") && await act(() => rpc("admin_delete_survey", { p_id: b.dataset.x }))) { open_ = null; load(); } });
   }
+  function reopen(x) {
+    const o = modal(`<h3>إعادة فتح الاستبانة</h3><p>تُفتح الاستبانة كـ<b>جولة ${x.round + 1}</b> للوصول إلى مشاركين جدد. تبقى نتائج الجولات السابقة والدراسات المعتمدة كما هي، ثم تختار لاحقاً بين تقرير جديد للجولة أو تقرير تراكمي لكل الجولات.</p>
+      <div class="fg"><div><label for="rt">العدد المستهدف للجولة الجديدة (اختياري)</label><input id="rt" type="number" min="1" inputmode="numeric"><small class="hint">تُغلق الاستبانة تلقائياً عند بلوغه، ويُحتسب من مشاركي الجولة الجديدة فقط.</small></div>
+      <div><label for="rc">آخر موعد (اختياري)</label><input id="rc" type="date"></div></div>
+      ${["teacher", "administrative"].includes(x.audience) ? '<p class="hint">يُشعَر من لم يشارك من المنسوبين. من شارك سابقاً لا يشارك مرة أخرى.</p>' : '<p class="hint">يعود الرابط نفسه للعمل فور إعادة الفتح.</p>'}
+      <p class="err" id="em"></p><div class="acts mt"><button class="btn" id="ok">إعادة الفتح</button><button class="btn sec" id="cx">إلغاء</button></div>`);
+    o.querySelector("#cx").onclick = () => o.remove();
+    o.querySelector("#ok").onclick = async () => { const t = o.querySelector("#rt").value, d = o.querySelector("#rc").value;
+      if (await act(() => rpc("admin_reopen_survey", { p_id: x.id, p_target: t ? Number(t) : null, p_closes: d ? new Date(d + "T23:59:59").toISOString() : null }), "أُعيد فتح الاستبانة")) { o.remove(); await load(); const y = L.find((z) => z.id === x.id); if (y && PUB.includes(y.audience)) share(y); } }; }
   async function preview(id) { const box = () => document.getElementById("q-" + id); try { const d = cache[id] || (cache[id] = await rpc("admin_get_survey", { p_id: id })); const el = box(); if (!el) return;
     el.innerHTML = d.questions.map((q, i) => `<div class="pq"><b>${i + 1}. ${esc(q.prompt)}</b><div class="hint">${DOM[q.domain] || ""}</div><div class="pq-o">${(q.options || []).map((t, k) => `<span>${k + 1} ${esc(t)}</span>`).join("")}</div></div>`).join("") +
       (PUB.includes(d.audience) && d.status !== "draft" ? `<div class="acts"><button class="btn sm sec" data-r="${id}">بيانات المشاركين</button></div>` : "");

@@ -10,7 +10,7 @@ const id = new URLSearchParams(location.search).get("id"); let dom = "all", time
 const fail = (x) => { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div><p><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>`; };
 async function fetchStudy(refresh) {   // المدير يرى مسودة حية: نحدّثها من الإجابات الحالية قبل العرض
   let r = await rpc("study_get", { p_id: id });
-  if (r.can_manage && r.status === "draft" && (refresh || !r.snapshot.items)) { try { await rpc("admin_generate_study", { p_survey: r.survey_id }); r = await rpc("study_get", { p_id: id }); } catch (_) {} }
+  if (r.can_manage && r.status === "draft" && (refresh || !r.snapshot.items)) { try { await rpc("admin_generate_study", { p_survey: r.survey_id, p_scope: r.scope, p_round: r.round }); r = await rpc("study_get", { p_id: id }); } catch (_) {} }
   if (r.can_manage && r.snapshot.items) { try { const t = await rpc("survey_results", { p_id: r.survey_id }); texts = t.texts_hidden ? { hidden: true, min: t.min } : Object.fromEntries(t.items.filter((x) => x.kind === "text").map((x) => [x.id, x.texts || []])); } catch (_) {} }
   lastAt = new Date(); return r; }
 const item = (x, i, names) => { const d = names[x.domain] || ""; let h = `<div class="qx"><h4><span class="qn">${i + 1}</span><span>${esc(x.prompt)}<small class="hint" style="display:block">${esc(d)}</small></span>${x.kind === "scale" ? `<span class="m" style="background:${CH.tone(x.mean)}">${x.mean ?? "—"}</span>` : ""}</h4>`;
@@ -25,7 +25,9 @@ function paint(r) { const sn = r.snapshot, mg = r.can_manage;
   const shown = sn.items.filter((x) => dom === "all" || x.domain === dom), rank = [...scale].filter((x) => x.mean != null).sort((a, b) => b.mean - a.mean);
   const fav = scale.reduce((a, x) => a + (x.dist ? x.dist[2] + x.dist[3] : 0), 0), allv = scale.reduce((a, x) => a + (x.answered || 0), 0);
   $("#app").innerHTML = `<div class="row2"><h2>${esc(sv.title)}</h2><span class="badge ${r.status === "approved" ? "ok" : "warn"}">${r.status === "approved" ? "دراسة معتمدة" : live ? "مسودة دراسة · جارية" : "مسودة دراسة · مكتملة"}</span></div>
-  <p class="sub">دراسة إلكترونية · ${AUD[sv.audience] || ""} · ${esc(A.C.schoolName)}${r.approved_at ? " · اعتُمدت " + fmt(r.approved_at) : ""}</p>
+  <p class="sub">${r.scope === "cumulative" ? `تقرير تراكمي (الجولات 1 إلى ${r.round})` : r.survey_round > 1 || r.round > 1 ? `تقرير الجولة ${r.round}` : "دراسة إلكترونية"} · ${AUD[sv.audience] || ""} · ${esc(A.C.schoolName)}${r.approved_at ? " · اعتُمدت " + fmt(r.approved_at) : ""}</p>
+  ${mg && r.siblings.length > 1 ? `<div class="dtabs" aria-label="تقارير هذه الاستبانة">${r.siblings.map((z) => `<button data-s="${z.id}" class="${z.id === r.id ? "on" : ""}">${z.scope === "cumulative" ? "تراكمي حتى الجولة " + z.round : "الجولة " + z.round}${z.status === "approved" ? " · معتمد" : ""}</button>`).join("")}</div>` : ""}
+  ${mg && r.survey_round > 1 ? `<div class="livebar off" style="flex-wrap:wrap"><b>إصدار تقرير</b><span class="hint">للاستبانة ${r.survey_round} جولات.</span><button class="btn sm sec" data-g="round">تقرير جديد: الجولة ${r.survey_round} وحدها</button><button class="btn sm sec" data-g="cumulative">تقرير تراكمي: كل الجولات</button></div>` : ""}
   ${mg && r.status === "draft" ? `<div class="livebar ${live ? "" : "off"}"><span class="dot"></span><b>${live ? "نتائج حية" : "اكتمل جمع الإجابات"}</b><span class="hint">${live ? "تتحدث الأرقام تلقائياً كل 20 ثانية" + (tg ? ` وتُغلق الاستبانة تلقائياً عند بلوغ ${tg} مشاركاً` : "") : "أُغلقت الاستبانة. راجع الدراسة ثم اعتمدها من إدارة الدراسات"}</span><span class="hint" style="margin-inline-start:auto">آخر تحديث ${lastAt.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span><button class="btn sm sec" id="rf">تحديث الآن</button></div>` : ""}
   <div class="kp"><div>${CH.gauge(sn.overall_mean)}<b>${esc(sn.level)}</b><small>المتوسط العام</small></div><div>${CH.ring(n, tg || sn.eligible, tg || sn.eligible ? "من " + (tg || sn.eligible) : "مشاركاً")}<b>${n} مشاركاً</b><small>${tg ? "الهدف " + tg : sn.eligible ? "من " + sn.eligible + " مؤهلاً" : "بلا عدد مستهدف"}</small></div>
     <div>${CH.ring(fav, allv, "إيجابية")}<b>${allv ? Math.round(100 * fav / allv) + "%" : "—"}</b><small>إجابات إيجابية (٣ و٤)</small></div></div>
@@ -39,6 +41,8 @@ function paint(r) { const sn = r.snapshot, mg = r.can_manage;
   ${shown.map((x, i) => item(x, sn.items.indexOf(x), names)).join("") || '<p class="hint">لا عبارات.</p>'}
   <p class="hint">التحليل وصفي قائم على قواعد ثابتة (قوة عند متوسط 3.3 فأعلى من 4، ومتابعة تحت 2.8)، وهو أداة مساندة لقرار الإدارة ولا يُعدّ تقويماً لأداء أحد.</p>
   <p class="mt acts"><button class="btn" id="pr">طباعة / حفظ PDF</button><a class="btn sec" href="${mg ? "studies-admin.html" : "dashboard.html"}">رجوع</a></p>`;
+  document.querySelectorAll("[data-s]").forEach((b) => b.onclick = () => { location.href = "study.html?id=" + b.dataset.s; });
+  document.querySelectorAll("[data-g]").forEach((b) => b.onclick = async () => { b.disabled = true; try { const sid = await rpc("admin_generate_study", { p_survey: r.survey_id, p_scope: b.dataset.g }); location.href = "study.html?id=" + sid; } catch (x) { b.disabled = false; alert(msg(x)); } });
   document.querySelectorAll("[data-d]").forEach((b) => b.onclick = () => { dom = b.dataset.d; paint(r); });
   $("#pr").onclick = () => window.print(); const rf = $("#rf"); if (rf) rf.onclick = () => tick(true); }
 let cur = null;
