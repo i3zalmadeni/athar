@@ -4,29 +4,11 @@
 <body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/app.js"></script>
 <script>
-(async () => { if (!(await A.guard("dashboard"))) return; const { me } = { me: A.state.me }, { esc, rpc, $, fmt } = A;
-const head = `<section class="hero"><h1>مرحباً، ${esc(me.display_name)}</h1><p>${A.TYPE_AR[me.user_type]} · ${me.roles.map(r => esc(r.name_ar)).join("، ")}</p></section>`;
+(async () => { if (!(await A.guard("dashboard"))) return; const me = A.state.me, { esc, rpc, $, fmt } = A;
+const head = `<section class="hero"><h1>مرحباً، ${esc(me.display_name)}</h1><p>${me.roles.map(r => esc(r.name_ar)).join("، ")}</p></section>`;
 if (me.status !== "active") { $("#app").innerHTML = head + A.statusScreen(me); return; }
-let body = "";
-if (me.user_type === "staff") {
-  let d = {}; try { d = await rpc("admin_dashboard"); } catch (_) {}
-  const cards = [["pending_accounts","طلبات تفعيل بانتظارك","admin.html#pending"],["pending_links","طلبات ربط أولياء الأمور","admin.html#links"],["pending_students","طلاب بانتظار التحقق","admin.html#students"]].filter(([k]) => d[k] != null);
-  body = `${cards.length ? `<h3 class="sec">المطلوب منك</h3><div class="grid">${cards.map(([k,t,h]) => `<a class="stat" href="${h}" style="text-decoration:none"><b>${d[k]}</b><span>${t}</span></a>`).join("")}</div>` : ""}
-   ${d.accounts_by_type ? `<h3 class="sec">الحسابات الفعّالة</h3><div class="grid">${Object.entries(d.accounts_by_type).map(([t,c]) => `<div class="stat"><b>${c}</b><span>${A.TYPE_AR[t] || t}</span></div>`).join("")}</div>` : ""}
-   <h3 class="sec">ارتباطك بالنواة الرقمية</h3><div class="card">${me.staff_link ? `مرتبط بسجلك في النواة (المصدر: ${me.staff_link.core_source === "demo" ? "وضع تجريبي" : "واجهة النواة"}) منذ ${fmt(me.staff_link.verified_at)}` : "غير مرتبط"}</div>`;
-} else if (me.user_type === "student") {
-  const s = me.student || {};
-  body = `<h3 class="sec">ملفي</h3><div class="card"><div class="fg"><div><small class="hint">رقم الطالب</small><div>${esc(s.student_no)}</div></div><div><small class="hint">الصف</small><div>${esc(s.grade)}${s.section ? " / " + esc(s.section) : ""}</div></div>
-   <div><small class="hint">التحقق من البيانات</small><div>${{unverified:'<span class="badge warn">بانتظار التحقق</span>',verified:'<span class="badge ok">تم التحقق</span>',rejected:'<span class="badge bad">تعذّر التحقق</span>'}[s.verification_status]}</div></div></div>
-   <p class="hint">ربط حسابك بسجلك في النواة الرقمية يتم عند توفر التكامل مع سجل المتعلمين.</p></div>`;
-} else {
-  const render = async () => { const L = await rpc("guardian_students");
-    $("#links").innerHTML = L.length ? L.map((l) => `<div class="item"><div class="row2"><div>${l.status === "verified" ? `<b>${esc(l.student.full_name)}</b><div class="hint">${esc(l.student.grade)}${l.student.section ? " / " + esc(l.student.section) : ""} · رقم ${esc(l.student.student_no)}</div>`
-     : `<b>طالب رقم ${esc(l.student.student_no)}</b><div class="hint">لا تظهر بياناته قبل اعتماد العلاقة</div>`}</div>
-     <span class="badge ${{pending:"warn",verified:"ok",rejected:"bad"}[l.status]}">${{pending:"بانتظار التحقق",verified:"معتمد",rejected:"مرفوض"}[l.status]}</span></div>${l.note ? `<small>${esc(l.note)}</small>` : ""}</div>`).join("") : '<div class="empty">لا يوجد أبناء مرتبطون بعد.</div>'; };
-  body = `<h3 class="sec">أبنائي</h3><div id="links"></div><h3 class="sec">إضافة ابن</h3><form class="card bar" id="lf"><input id="ls" dir="ltr" placeholder="رقم الطالب" required>
-   <select id="lr"><option value="father">أب</option><option value="mother">أم</option><option value="guardian">وصي</option><option value="brother">أخ</option><option value="other">أخرى</option></select><button class="btn">إرسال طلب الربط</button></form>`;
-  setTimeout(async () => { await render(); $("#lf").onsubmit = async (e) => { e.preventDefault(); try { await rpc("request_link", { p_student_no: $("#ls").value, p_relation: $("#lr").value }); A.toast("أُرسل طلب الربط للمراجعة"); $("#ls").value = ""; await render(); } catch (x) { A.toast(A.msg(x), true); } }; }, 0);
-}
-$("#app").innerHTML = head + body; })();
+let d = {}; try { d = await rpc("admin_dashboard"); } catch (_) {}
+const cards = [["pending_links","طلبات ربط أولياء الأمور","admin.html#links"],["pending_students","طلاب بانتظار التحقق","admin.html#students"],["active_intake_links","روابط تعبئة فعّالة","admin.html#intake"],["staff_accounts","حسابات المنسوبين الفعّالة","admin.html#accounts"]].filter(([k]) => d[k] != null);
+$("#app").innerHTML = head + (cards.length ? `<h3 class="sec">نظرة سريعة</h3><div class="grid">${cards.map(([k,t,h]) => `<a class="stat" href="${h}" style="text-decoration:none"><b>${d[k]}</b><span>${t}</span></a>`).join("")}</div>` : '<div class="card">لا توجد مهام إدارية مرتبطة بصلاحياتك.</div>')
+ + `<h3 class="sec">ارتباطك بالنواة الرقمية</h3><div class="card">${me.staff_link ? `حسابك موحّد مع النواة الرقمية، وجرى التحقق منه ${fmt(me.staff_link.verified_at)}.` : "غير مرتبط"}</div>`; })();
 </script></body></html>

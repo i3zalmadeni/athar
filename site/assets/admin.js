@@ -1,9 +1,9 @@
 // لوحة الإدارة: عمليات وطوابير. الإظهار بحسب الصلاحية للتجربة فقط؛ التحقق الفعلي في دوال الخادم وقاعدة البيانات.
 (async () => {
   if (!(await A.guard("admin.html", ["staff"]))) return;
-  const { esc, rpc, $, fmt, can, badge, msg, toast, api, sb } = A, me = A.state.me;
+  const { esc, rpc, $, fmt, can, badge, msg, toast, sb } = A, me = A.state.me;
   if (me.status !== "active") { $("#app").innerHTML = A.statusScreen(me); return; }
-  const TABS = [["pending","الطلبات","accounts:approve"],["accounts","الحسابات","accounts:view"],["links","ربط أولياء الأمور","links:review"],["students","الطلاب","students:view"],
+  const TABS = [["intake","روابط التعبئة","intake:manage"],["links","ربط أولياء الأمور","links:review"],["students","الطلاب","students:view"],["accounts","حسابات المنسوبين","accounts:view"],
     ["roles","الأدوار والصلاحيات","roles:manage"],["audit","سجل العمليات","audit:view"],["settings","الإعدادات والتكامل","settings:manage"]].filter(t => can(t[2]) || (t[0] === "settings" && can("integration:view")));
   if (!TABS.length) { $("#app").innerHTML = '<div class="alert bad">ليست لديك صلاحيات إدارية.</div>'; return; }
   const ROLE_AR = {}; me.roles.forEach(r => ROLE_AR[r.code] = r.name_ar);
@@ -20,25 +20,29 @@
   const table = (heads, rows) => `<div class="tw"><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows || `<tr><td colspan="${heads.length}" class="empty">لا توجد سجلات.</td></tr>`}</tbody></table></div>`;
 
   const V = {
-    async pending() { const r = await rpc("admin_accounts", { p_status: "pending", p_limit: 100 });
-      $("#pane").innerHTML = table(["الاسم", "النوع", "الحالة", "الأدوار", "تاريخ الطلب", "القرار"], r.rows.map(a => rowAcct(a, `<button class="btn sm" data-a="active" data-id="${a.id}">اعتماد</button><button class="btn sm bad" data-a="rejected" data-id="${a.id}">رفض</button>`)).join(""));
-      document.querySelectorAll("[data-a]").forEach(b => b.onclick = async () => { const note = b.dataset.a === "rejected" ? ask("سبب الرفض (اختياري)") : null; if (note === null && b.dataset.a === "rejected") return; if (await act(() => rpc("admin_set_status", { p_account: b.dataset.id, p_status: b.dataset.a, p_note: note }))) load(); }); },
-    async accounts() { $("#pane").innerHTML = `<div class="bar"><input id="q" placeholder="بحث بالاسم أو المعرّف"><select id="st"><option value="">كل الحالات</option><option value="active">مفعّل</option><option value="pending">بانتظار الاعتماد</option><option value="suspended">موقوف</option><option value="rejected">مرفوض</option></select><select id="ty"><option value="">كل الأنواع</option><option value="staff">منسوب</option><option value="student">طالب</option><option value="parent">ولي أمر</option></select></div><div id="lst"></div>`;
-      const go = async () => { const r = await rpc("admin_accounts", { p_status: $("#st").value || null, p_type: $("#ty").value || null, p_q: $("#q").value, p_limit: 50 });
+    async intake() { const L = await rpc("admin_intake_links"), base = location.href.replace(/[^/]*$/, "") + "form.html?t=";
+      $("#pane").innerHTML = `<form class="card bar" id="nf"><select id="k"><option value="student">طلاب</option><option value="parent">أولياء أمور</option></select><input id="lb" placeholder="وصف الرابط (اختياري)" maxlength="80"><input id="ex" type="date" title="تاريخ الانتهاء"><input id="mu" type="number" min="1" placeholder="أقصى عدد" style="width:110px"><button class="btn">إنشاء رابط</button></form>
+      <p class="hint">يفتح الرابط نموذج تعبئة بلا دخول. شاركه بالطريقة التي تراها مناسبة، وأوقفه متى شئت.</p>` +
+      table(["النوع", "الوصف", "الاستخدام", "الانتهاء", "الحالة", ""], L.map(l => `<tr><td>${l.kind === "student" ? "طلاب" : "أولياء أمور"}</td><td>${esc(l.label || "—")}</td><td>${l.uses}${l.max_uses ? " / " + l.max_uses : ""}</td><td>${l.expires_at ? fmt(l.expires_at) : "—"}</td>
+        <td>${l.usable ? '<span class="badge ok">فعّال</span>' : '<span class="badge bad">غير فعّال</span>'}</td><td class="acts"><button class="btn sm sec" data-c="${l.token}">نسخ الرابط</button><button class="btn sm ${l.active ? "bad" : ""}" data-t="${l.id}" data-v="${l.active ? 0 : 1}">${l.active ? "إيقاف" : "تفعيل"}</button></td></tr>`).join(""));
+      $("#nf").onsubmit = async (e) => { e.preventDefault(); const ex = $("#ex").value; if (await act(() => rpc("admin_create_intake_link", { p_kind: $("#k").value, p_label: $("#lb").value || null, p_expires: ex ? new Date(ex + "T23:59:59").toISOString() : null, p_max_uses: $("#mu").value ? Number($("#mu").value) : null }), "أُنشئ الرابط")) load(); };
+      document.querySelectorAll("[data-c]").forEach(b => b.onclick = async () => { const u = base + b.dataset.c; try { await navigator.clipboard.writeText(u); toast("نُسخ الرابط"); } catch (_) { prompt("انسخ الرابط", u); } });
+      document.querySelectorAll("[data-t]").forEach(b => b.onclick = async () => { if (await act(() => rpc("admin_set_intake_link", { p_id: b.dataset.t, p_active: b.dataset.v === "1" }))) load(); }); },
+    async accounts() { $("#pane").innerHTML = `<div class="bar"><input id="q" placeholder="بحث بالاسم أو المعرّف"><select id="st"><option value="">كل الحالات</option><option value="active">مفعّل</option><option value="pending">بانتظار الاعتماد</option><option value="suspended">موقوف</option><option value="rejected">مرفوض</option></select></div><div id="lst"></div>`;
+      const go = async () => { const r = await rpc("admin_accounts", { p_status: $("#st").value || null, p_type: "staff", p_q: $("#q").value, p_limit: 50 });
         $("#lst").innerHTML = `<p class="hint">${r.total} حساب</p>` + table(["الاسم", "النوع", "الحالة", "الأدوار", "تاريخ الإنشاء", "إجراءات"], r.rows.map(a => rowAcct(a,
           `${a.id !== me.id && can("accounts:manage") ? (a.status === "active" ? `<button class="btn sm bad" data-s="suspended" data-id="${a.id}">إيقاف</button>` : a.status === "suspended" ? `<button class="btn sm" data-s="active" data-id="${a.id}">تفعيل</button>` : "") : ""}
-           ${a.id !== me.id && can("roles:manage") ? `<button class="btn sm sec" data-r="${a.id}">الأدوار</button>` : ""}${a.id !== me.id && can("accounts:reset_password") ? `<button class="btn sm sec" data-p="${a.id}">كلمة مرور</button>` : ""}`)).join(""));
+           ${a.id !== me.id && can("roles:manage") ? `<button class="btn sm sec" data-r="${a.id}">الأدوار</button>` : ""}`)).join(""));
         document.querySelectorAll("[data-s]").forEach(b => b.onclick = async () => { const note = ask("ملاحظة (اختياري)"); if (note === null) return; if (await act(() => rpc("admin_set_status", { p_account: b.dataset.id, p_status: b.dataset.s, p_note: note }))) go(); });
-        document.querySelectorAll("[data-p]").forEach(b => b.onclick = async () => { const pw = ask("كلمة المرور الجديدة المؤقتة"); if (!pw) return; const tok = (await sb.auth.getSession()).data.session?.access_token; await act(() => api("reset_password", { account_id: b.dataset.p, new_password: pw }, tok), "تم تعيين كلمة المرور"); });
         document.querySelectorAll("[data-r]").forEach(b => b.onclick = () => rolesModal(r.rows.find(x => x.id === b.dataset.r), go)); };
-      ["q", "st", "ty"].forEach(i => $("#" + i).oninput = go); go(); },
+      ["q", "st"].forEach(i => $("#" + i).oninput = go); go(); },
     async links() { const L = await rpc("admin_links", { p_status: "pending" });
-      $("#pane").innerHTML = table(["ولي الأمر", "الطالب", "الصف", "صلة القرابة", "تاريخ الطلب", "القرار"], L.map(l => `<tr><td>${esc(l.guardian_name)}<div class="hint" dir="ltr" style="text-align:right">${esc(l.guardian_login)}</div></td><td>${esc(l.student_name)}<div class="hint">${esc(l.student_no)}</div></td><td>${esc(l.grade)}</td><td>${{ father: "أب", mother: "أم", guardian: "وصي", brother: "أخ", other: "أخرى" }[l.relation]}</td><td>${fmt(l.requested_at)}</td>
+      $("#pane").innerHTML = table(["ولي الأمر", "الطالب", "الصف", "صلة القرابة", "تاريخ الطلب", "القرار"], L.map(l => `<tr><td>${esc(l.guardian_name)}<div class="hint" dir="ltr" style="text-align:right">${esc(l.guardian_phone || "")}</div></td><td>${esc(l.student_name)}<div class="hint">${esc(l.student_no)}</div></td><td>${esc(l.grade)}</td><td>${{ father: "أب", mother: "أم", guardian: "وصي", brother: "أخ", other: "أخرى" }[l.relation]}</td><td>${fmt(l.requested_at)}</td>
         <td class="acts"><button class="btn sm" data-d="verified" data-id="${l.id}">اعتماد</button><button class="btn sm bad" data-d="rejected" data-id="${l.id}">رفض</button></td></tr>`).join(""));
       document.querySelectorAll("[data-d]").forEach(b => b.onclick = async () => { const note = ask("ملاحظة (اختياري)"); if (note === null) return; if (await act(() => rpc("admin_link_decide", { p_link: b.dataset.id, p_decision: b.dataset.d, p_note: note }))) load(); }); },
     async students() { $("#pane").innerHTML = `<div class="bar"><input id="q" placeholder="بحث بالاسم أو الرقم"></div><div id="lst"></div>`;
       const go = async () => { const S = await rpc("admin_students", { p_q: $("#q").value, p_limit: 100 });
-        $("#lst").innerHTML = table(["الطالب", "الصف", "الحساب", "التحقق", "أولياء أمور معتمدون", ""], S.map(s => `<tr><td>${esc(s.full_name)}<div class="hint">${esc(s.student_no)}</div></td><td>${esc(s.grade)}${s.section ? " / " + esc(s.section) : ""}</td><td>${s.account_status ? badge(s.account_status) : "—"}</td>
+        $("#lst").innerHTML = table(["الطالب", "الصف", "التحقق", "أولياء أمور معتمدون", ""], S.map(s => `<tr><td>${esc(s.full_name)}<div class="hint">${esc(s.student_no)}</div></td><td>${esc(s.grade)}${s.section ? " / " + esc(s.section) : ""}</td>
           <td>${{ unverified: '<span class="badge warn">بانتظار التحقق</span>', verified: '<span class="badge ok">تم التحقق</span>', rejected: '<span class="badge bad">مرفوض</span>' }[s.verification_status]}</td><td>${s.parents}</td>
           <td class="acts">${can("students:verify") && s.verification_status !== "verified" ? `<button class="btn sm" data-v="verified" data-id="${s.id}">تحقق</button>` : ""}${can("students:verify") && s.verification_status === "unverified" ? `<button class="btn sm bad" data-v="rejected" data-id="${s.id}">رفض</button>` : ""}</td></tr>`).join(""));
         document.querySelectorAll("[data-v]").forEach(b => b.onclick = async () => { if (await act(() => rpc("admin_student_verify", { p_student: b.dataset.id, p_decision: b.dataset.v }))) go(); }); };
@@ -55,15 +59,12 @@
       $("#q").oninput = go; go(); },
     async settings() { let h = "";
       if (can("integration:view")) { const c = await rpc("core_status");
-        h += `<h3 class="sec">التكامل مع النواة الرقمية</h3><div class="card"><div class="fg"><div><small class="hint">الوضع</small><div>${c.mode === "demo" ? '<span class="badge warn">تجريبي (بيانات موسومة، لا اتصال فعلي)</span>' : '<span class="badge info">واجهة API</span>'}</div></div>
-          <div><small class="hint">آخر فحص</small><div>${fmt(c.last_check_at)}</div></div><div><small class="hint">نتيجة آخر فحص</small><div>${c.last_ok === null ? "—" : c.last_ok ? '<span class="badge ok">ناجح</span>' : '<span class="badge bad">فشل</span>'}</div></div>
-          <div><small class="hint">آخر نجاح</small><div>${fmt(c.last_ok_at)}</div></div><div><small class="hint">منسوبون مرتبطون</small><div>${c.linked_staff}</div></div></div>${c.last_error ? `<div class="alert bad mt">${esc(c.last_error)}</div>` : ""}
-          ${can("settings:manage") ? `<p class="hint mt">التحويل إلى وضع API يتطلب ضبط CORE_API_URL وCORE_API_KEY في أسرار الدالة الطرفية، وإلا يفشل التسجيل ويظهر الخطأ هنا ولا تُعرض بيانات قديمة.</p><button class="btn sec sm" id="cm">${c.mode === "demo" ? "التحويل إلى وضع API" : "الرجوع إلى الوضع التجريبي"}</button>` : ""}</div>`; }
+        h += `<h3 class="sec">التكامل مع النواة الرقمية</h3><div class="card"><div class="fg"><div><small class="hint">الوضع</small><div><span class="badge info">${c.mode === "api" ? "واجهة API (غير مفعّلة)" : "قراءة مباشرة من قاعدة النواة (للقراءة فقط)"}</span></div></div>
+          <div><small class="hint">آخر تحقق ناجح</small><div>${fmt(c.last_ok_at)}</div></div><div><small class="hint">منسوبون مرتبطون</small><div>${c.linked_staff}</div></div></div>${c.last_error ? `<div class="alert bad mt">${esc(c.last_error)}</div>` : ""}</div>`; }
       if (can("settings:manage")) { const S = await rpc("admin_settings");
         h += `<h3 class="sec">إعدادات النظام</h3>` + S.map(s => `<div class="item"><div class="row2"><div><b>${esc(s.description || s.key)}</b><div class="hint" dir="ltr" style="text-align:right">${esc(s.key)}</div></div>
           ${typeof s.value === "boolean" ? `<input type="checkbox" style="width:auto" data-k="${s.key}" ${s.value ? "checked" : ""}>` : `<input type="number" style="width:90px" data-k="${s.key}" value="${esc(s.value)}">`}</div></div>`).join(""); }
       $("#pane").innerHTML = h;
-      const cm = $("#cm"); if (cm) cm.onclick = async () => { if (await act(() => rpc("admin_set_core_mode", { p_mode: cm.textContent.includes("API") ? "api" : "demo" }))) load(); };
       document.querySelectorAll("[data-k]").forEach(i => i.onchange = async () => { const v = i.type === "checkbox" ? i.checked : Number(i.value); if (!(await act(() => rpc("admin_set_setting", { p_key: i.dataset.k, p_value: v })))) load(); }); },
   };
   async function rolesModal(a, done) { const R = await rpc("admin_roles"), cand = R.roles.filter(r => !r.user_type || r.user_type === a.user_type);

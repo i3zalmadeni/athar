@@ -5,13 +5,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/app.js"></script>
 <script>
 (async () => { await A.loadMe(); await A.chrome("index.html"); const me = A.state.me;
-let info = {}; try { info = await A.sb.rpc("athar_public_info").then(r => r.data || {}); } catch (_) {}
-const gates = [["staff","المنسوبون","دخول المعلمين والإداريين وبقية منسوبي المدرسة. تُستمد بياناتك الأساسية من النواة الرقمية ولا تُعاد كتابتها.","school"],
- ["student","الطلاب","تسجيل الطالب وملفه الشخصي ومتابعة حسابه.","user"],["parent","أولياء الأمور","تسجيل ولي الأمر وربط حسابه بأبنائه بعد التحقق.","family"]];
-A.$("#app").innerHTML = `<section class="hero"><h1>أثر</h1><p>النظام الرقمي لمدرسة لبيد بن ربيعة المتوسطة، ضمن منظومة النواة الرقمية. حسابات مستقلة وصلاحيات واضحة لكل فئة.</p>
-${me ? '<p><a class="btn sec" href="dashboard.html">الانتقال إلى لوحة التحكم</a></p>' : ""}</section>
-<h2 id="gates">بوابات الدخول</h2><p class="sub">اختر البوابة المناسبة لك. لكل فئة رابط مستقل ونموذج تسجيل خاص بها.</p>
-<div class="grid">${gates.map(([k,t,d,i]) => `<a class="card gate" href="${A.PORTAL[k][0]}"><span class="ic">${A.ico(i)}</span><b>${t}</b><span>${d}</span><span class="btn sm sec" style="align-self:flex-start">دخول وتسجيل</span></a>`).join("")}</div>
-<h3 class="sec">عن النظام</h3><div class="card"><p>أثر نظام تشغيلي مستقل بقاعدة بياناته. تبقى النواة الرقمية المرجع الوحيد لبيانات المنسوبين، ولا يعدّل أثر فيها شيئاً.</p>
-<p class="hint">للمساعدة والتواصل: <a href="help.html">صفحة المساعدة</a>.</p></div>`; })();
-</script></body></html>
+A.$("#app").innerHTML = `<section class="hero"><h1>أثر</h1><p>النظام الرقمي لمدرسة لبيد بن ربيعة المتوسطة، ضمن منظومة النواة الرقمية.</p>
+<p><a class="btn sec" href="${me ? "dashboard.html" : "login.html"}">${me ? "الانتقال إلى لوحة التحكم" : "دخول المنسوبين"}</a></p></section>
+<div class="grid"><div class="card"><span class="ic">${A.ico("school")}</span><b>المنسوبون</b><p>يدخلون بحساب النواة الرقمية الموحد، وتُستمد بياناتهم الأساسية منها ولا تُعاد كتابتها.</p></div>
+<div class="card"><span class="ic">${A.ico("family")}</span><b>الطلاب وأولياء الأمور</b><p>لا حاجة لحساب. تصلكم من المدرسة رابط تعبئة تفتحونه وتعبّئون النموذج مباشرة.</p></div></div>
+<p class="hint mt">للمساعدة: <a href="help.html">صفحة المساعدة</a>.</p>`; })();
+</script>
+</body></html>

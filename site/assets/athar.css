@@ -73,3 +73,8 @@ main>*,.grid>*{animation:rise .45s both}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media(max-width:600px){th,td{padding:8px 6px;font-size:.82rem}.hero{padding:26px 20px}}
 @media print{header,footer{display:none}}
+.lgi{display:grid;place-items:center;margin-bottom:8px}.lgi .core-ic{width:84px}.auth h2,.auth .sub{text-align:center}
+.ci-ring{transform-origin:80px 80px;animation:ci-spin 40s linear infinite}.ci-orb{transform-origin:80px 80px;animation:ci-spin 14s linear infinite}
+@keyframes ci-spin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.ci-ring,.ci-orb{animation:none}}
+.lgchk{display:flex!important;gap:10px;align-items:flex-start;margin:12px 0 4px!important;font-weight:500;cursor:pointer}.lgchk input{width:auto;margin-top:4px}.lgchk small{display:block;font-weight:400}
+.hp{position:absolute;inset-inline-start:-9999px;width:1px;height:1px;overflow:hidden}

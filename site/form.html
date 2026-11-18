@@ -1,0 +1,36 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نموذج التعبئة – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/athar.css"></head>
+<body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/app.js"></script>
+<script>
+(async () => {
+  const { $, esc, sb, msg } = A; await A.chrome("form.html");
+  const tok = new URLSearchParams(location.search).get("t") || "";
+  const card = (h) => { $("#app").innerHTML = `<div class="auth"><div class="card">${h}</div></div>`; };
+  let info = null; try { info = (await sb.rpc("athar_public_intake_info", { p_token: tok })).data; } catch (_) {}
+  if (!info || !info.valid) { card('<h2>الرابط غير صالح</h2><div class="alert bad">هذا الرابط غير صالح أو منتهٍ أو أُوقف. اطلب رابطاً جديداً من المدرسة.</div>'); return; }
+  const kind = info.kind, isS = kind === "student";
+  const REL = '<option value="father">أب</option><option value="mother">أم</option><option value="guardian">وصي</option><option value="brother">أخ</option><option value="other">أخرى</option>';
+  card(`<h2>${isS ? "تسجيل بيانات الطالب" : "تسجيل ولي الأمر"}</h2><p class="sub">${esc(A.C.schoolName)}${info.label ? " · " + esc(info.label) : ""}</p>
+  <form id="f" novalidate><div class="fg"><div class="full"><label for="fn">الاسم الكامل</label><input id="fn" required minlength="6" maxlength="100"></div>
+  ${isS ? `<div><label for="sno">رقم الطالب</label><input id="sno" dir="ltr" required></div>
+  <div><label for="gr">الصف</label><select id="gr" required><option value="">اختر</option><option>الأول المتوسط</option><option>الثاني المتوسط</option><option>الثالث المتوسط</option></select></div>
+  <div><label for="sec">الفصل (اختياري)</label><input id="sec" maxlength="20"></div><div><label for="bd">تاريخ الميلاد (اختياري)</label><input id="bd" type="date"></div>`
+  : `<div><label for="ph">رقم الجوال</label><input id="ph" dir="ltr" inputmode="tel" required></div><div><label for="sno">رقم الطالب (ابنك)</label><input id="sno" dir="ltr" required></div>
+  <div><label for="rel">صلة القرابة</label><select id="rel">${REL}</select></div>`}</div>
+  <div class="hp" aria-hidden="true"><label>الموقع<input id="web" tabindex="-1" autocomplete="off"></label></div>
+  ${isS ? "" : '<p class="hint">لا تظهر بيانات الطالب لأحد قبل أن تتحقق المدرسة من العلاقة.</p>'}
+  <p class="err" id="m" role="alert"></p><button class="btn block" id="go">إرسال</button></form>`);
+  $("#f").onsubmit = async (e) => { e.preventDefault(); const m = $("#m"), b = $("#go"); m.textContent = "";
+    const v = (i) => ($("#" + i)?.value || "").trim();
+    const p = { full_name: v("fn"), student_no: v("sno"), website: v("web") };
+    if (isS) { p.grade = v("gr"); if (v("sec")) p.section = v("sec"); if (v("bd")) p.birth_date = v("bd"); } else { p.phone = v("ph"); p.relation = v("rel"); }
+    if (p.full_name.length < 6 || !p.student_no || (isS ? !p.grade : !p.phone)) { m.textContent = "أكمل الحقول المطلوبة."; return; }
+    b.disabled = true;
+    const { data, error } = await sb.rpc("athar_public_submit", { p_token: tok, p_payload: p });
+    if (error || !data || !data.ok) { b.disabled = false; m.textContent = msg(error || { message: data && data.error }); return; }
+    card(`<h2>تم استلام ${isS ? "بياناتك" : "طلبك"}</h2><div class="alert ok">${isS ? "ستراجع المدرسة بياناتك وتتحقق منها." : "ستتحقق المدرسة من صلتك بالطالب."} لا حاجة لإنشاء حساب أو الدخول.</div>`); };
+})();
+</script>
+</body></html>

@@ -1,0 +1,31 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دخول المنسوبين – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/athar.css"></head>
+<body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/app.js"></script>
+<script>
+(async () => {
+  const { $, sb, rpc, msg } = A; await A.chrome("login.html");
+  const qs = new URLSearchParams(location.search), nx = qs.get("next"), dest = /^[a-z]+\.html(#[a-z]+)?$/.test(nx || "") ? nx : "dashboard.html";
+  const MSG = { not_staff: "هذا الحساب غير مرتبط بسجل منسوب في النواة الرقمية. راجع مدير النواة.", core_inactive: "حسابك غير مفعّل في النواة الرقمية. راجع مدير النواة." };
+  const RK = "dc_login_id";
+  A.$("#app").innerHTML = `<div class="auth"><div class="card"><div class="lgi">${A.CORE_ICON}</div><h2>النواة الرقمية</h2><p class="sub" style="font-weight:800;color:var(--brand2)">أثر</p><p class="sub">دخول المنسوبين · ${A.esc(A.C.schoolName)}</p>
+  <form id="f"><label for="e">معرّف الدخول</label><input id="e" required autocomplete="username" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="أرقام أو حروف إنجليزية">
+  <label for="p">كلمة المرور</label><input id="p" type="password" required autocomplete="current-password">
+  <label class="lgchk" for="rm"><input id="rm" type="checkbox"><span>حفظ معلوماتي<small class="hint">يحفظ معرّف الدخول على هذا الجهاز فقط، ولا تُحفظ كلمة المرور.</small></span></label>
+  <p class="err" id="m" role="alert"></p><button class="btn block" id="go">دخول</button></form>
+  <p class="hint mt">حساب واحد لكل أنظمة النواة الرقمية. الطلاب وأولياء الأمور لا يحتاجون حساباً، يصلهم رابط التعبئة من المدرسة.</p></div></div>`;
+  try { const v = localStorage.getItem(RK); if (v) { $("#e").value = v; $("#rm").checked = true; $("#p").focus(); } } catch (_) {}
+  const fail = async (t) => { $("#m").textContent = t; $("#go").disabled = false; };
+  // جلسة قائمة من النواة: نحاول الدخول مباشرة
+  const enter = async () => { try { await rpc("staff_session"); location.replace(dest); return true; } catch (x) { const k = Object.keys(MSG).find((k) => String(x.message || "").includes(k)); await sb.auth.signOut(); await fail(MSG[k] || msg(x)); return false; } };
+  if ((await sb.auth.getSession()).data.session) { $("#go").disabled = true; await enter(); }
+  $("#f").onsubmit = async (e) => { e.preventDefault(); if ($("#go").disabled) return; $("#m").textContent = ""; $("#go").disabled = true;
+    const id = $("#e").value.trim().toLowerCase(), email = id.includes("@") ? id : id + "@id.invalid";
+    const { error } = await sb.auth.signInWithPassword({ email, password: $("#p").value });
+    if (error) return fail(/banned/.test(error.code || "") ? "هذا الحساب موقوف. راجع مدير النواة." : (error.code === "invalid_credentials" || error.status === 400) ? "بيانات الدخول غير صحيحة." : "تعذر الاتصال بالخادم، حاول مرة أخرى.");
+    try { if ($("#rm").checked) localStorage.setItem(RK, id); else localStorage.removeItem(RK); } catch (_) {}
+    await enter(); };
+})();
+</script>
+</body></html>

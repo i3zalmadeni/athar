@@ -1,12 +1,3 @@
-# قاعدة البيانات (مخطط athar)
+# قاعدة البيانات
 
-| المجموعة | الجداول |
-|---|---|
-| الحسابات | `accounts`, `user_types`, `profiles` |
-| الصلاحيات | `roles`, `permissions`, `role_permissions`, `account_roles`, `account_permissions` |
-| المنسوبون | `staff_links` (معرّف مرجعي للنواة فقط) |
-| الطلاب وأولياء الأمور | `students`, `guardians`, `guardian_students` (حالة العلاقة: pending/verified/rejected) |
-| التشغيل | `system_settings`, `notifications`, `notification_prefs`, `audit_logs`, `login_attempts` |
-| التكامل | `core_integration`, `core_demo_staff` (تجريبي موسوم) |
-
-الترحيلات: `supabase/migrations/0001` (الجداول) و`0002` (الدوال والمنح). طُبّق الثاني فعلياً على دفعتين متكافئتين. كل الجداول RLS دون سياسات، ولا منح مباشرة. لا تُنشأ بيانات مستخدمين افتراضية.
+الترحيلات في `supabase/migrations`: 0001 المخطط، 0002 الدوال، 0003 روابط التعبئة وإزالة نموذج الحسابات القديم، 0004 دخول النواة ودوال التعبئة. أهم الجداول: accounts، roles، permissions، profiles، staff_links، students، guardians، guardian_students، intake_links، intake_log، notifications، audit_logs، system_settings، core_integration. أول مدير يُنشأ بعد أول دخول للمنسوب: `select athar.bootstrap_admin('<login_id>');` من محرر SQL.
