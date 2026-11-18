@@ -70,12 +70,16 @@
       const tabs = [["dashboard.html"], ...(sm ? [["surveys-admin.html"], ["studies-admin.html"]] : []), ...(adm ? [["admin.html"]] : [])];
       const cur = PAGES[active], roles = me.roles.map((r) => r.name_ar).join("، ");
       $("#hdr").innerHTML = `<header class="dash"><div class="wrap top">${brand("dashboard.html")}<div class="idl"><a class="sitelink" href="index.html">الموقع الإلكتروني</a>${headMoe}</div></div><div class="strip" aria-hidden="true"></div>
-        <div class="dnav"><div class="wrap dn"><button type="button" class="dmb" id="dmb" aria-expanded="false" aria-controls="dnavIn">${ico("menu")}<span class="dmb-t">القائمة</span></button>
+        <div class="dnav"><div class="wrap dn"><button type="button" class="dmb" id="dmb" aria-expanded="false" aria-controls="dnavIn">${ico("menu")}<span class="dmb-t">القائمة</span><svg class="dmb-ch" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
         <div class="dnav-in" id="dnavIn">${tabs.map(([h]) => `<a href="${h}" class="${h === on ? "on" : ""}" ${h === on ? 'aria-current="page"' : ""}>${ico(PAGES[h][1])}${PAGES[h][0]}</a>`).join("")}</div>
         <div class="dwho">${ubBarHTML(me.display_name, "dashboard.html")}</div></div></div></header>
         <div class="pagebar"><div class="wrap pb"><div class="pb-t"><small>${esc(roles)}</small><h1>${cur[0]}</h1></div><p class="pb-d">${cur[2]}</p></div></div>`;
       const d = $(".dnav"), b = $("#dmb"); const set = (o) => { d.classList.toggle("open", o); b.setAttribute("aria-expanded", o); };
-      b.onclick = (e) => { e.stopPropagation(); set(!d.classList.contains("open")); }; document.addEventListener("click", (e) => { if (!d.contains(e.target)) set(false); });
+      b.onclick = (e) => { e.stopPropagation(); set(!d.classList.contains("open")); };
+      d.querySelector(".dnav-in").addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
+      document.addEventListener("click", (e) => { if (!d.contains(e.target)) set(false); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && d.classList.contains("open")) { set(false); b.focus(); } });
+      matchMedia("(min-width:761px)").addEventListener("change", (m) => { if (m.matches) set(false); });
       const lo = $("#out"); lo.onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("index.html"); };   // الخروج يعيد إلى رئيسية النظام
       // الجرس المنبثق وقائمة الأنظمة والصورة: من شريط المستخدم الموحّد نفسه
       const TONE = { account: "info", link: "warn", system: "info" };
