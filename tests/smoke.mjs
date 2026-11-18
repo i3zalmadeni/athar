@@ -1,0 +1,28 @@
+// اختبار دخان للواجهات: يحاكي supabase-js ويفحص رسم الصفحات والروابط وغياب الأخطاء على ثلاثة أحجام شاشة.
+import { chromium } from "/opt/npm-tools/node_modules/playwright/index.mjs";
+import http from "node:http"; import fs from "node:fs"; import path from "node:path";
+const root = path.resolve("site"), mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
+const srv = http.createServer((q, r) => { const f = path.join(root, q.url.split("?")[0].split("#")[0].replace(/\/$/, "/index.html")); if (!f.startsWith(root) || !fs.existsSync(f)) { r.writeHead(404); return r.end(); } r.writeHead(200, { "content-type": mime[path.extname(f)] || "text/plain" }); r.end(fs.readFileSync(f)); }).listen(0);
+const base = `http://localhost:${srv.address().port}/`;
+const stub = (me) => `window.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session:${me ? "{access_token:'x'}" : "null"}}}),signOut:async()=>{},setSession:async()=>({})},
+ rpc:async(fn)=>{const M=${JSON.stringify(me)};const d={athar_public_info:{core_mode:'demo',min_password:8},athar_me:M,athar_admin_dashboard:{pending_accounts:2,pending_links:1,pending_students:3,accounts_by_type:{staff:2,student:5}},athar_my_notifications:[{id:1,kind:'account',title:'تم تفعيل حسابك',status:'sent',created_at:new Date().toISOString(),link:'dashboard.html'}],athar_notif_prefs:{},athar_my_activity:[],athar_guardian_students:[],
+ athar_admin_accounts:{total:1,rows:[{id:'a',login_id:'t1',display_name:'اختبار',user_type:'staff',status:'pending',roles:['staff'],created_at:new Date().toISOString()}]},athar_admin_roles:{roles:[],permissions:[]},athar_core_status:{mode:'demo',linked_staff:0},athar_admin_settings:[]};return{data:d[fn]??null,error:null}}})}`;
+const ME = { staff: { id: "s", login_id: "t_admin", display_name: "[اختبار] مدير", user_type: "staff", status: "active", roles: [{ code: "admin", name_ar: "مدير النظام" }], permissions: ["accounts:view","accounts:approve","accounts:manage","accounts:reset_password","roles:manage","links:review","students:view","students:verify","audit:view","settings:manage","integration:view"], unread: 1, core_mode: "demo", staff_link: { core_source: "demo", verified_at: new Date().toISOString() }, profile: {} },
+  student: { id: "t", login_id: "t_stu", display_name: "[اختبار] طالب", user_type: "student", status: "pending", roles: [{ code: "student", name_ar: "طالب" }], permissions: [], unread: 0, student: { student_no: "T-1", grade: "الأول المتوسط", verification_status: "unverified" }, profile: {} } };
+const b = await chromium.launch(), res = []; const sizes = [[390, 800], [820, 1000], [1366, 800]];
+const pages = [["index.html", null], ["staff.html", null], ["student.html", null], ["parent.html", null], ["help.html", null], ["dashboard.html", "staff"], ["admin.html", "staff"], ["profile.html", "staff"], ["notifications.html", "staff"], ["dashboard.html", "student"]];
+for (const [p, who] of pages) for (const [w, h] of sizes) {
+  const ctx = await b.newContext({ viewport: { width: w, height: h } }), pg = await ctx.newPage(), errs = [];
+  pg.on("pageerror", (e) => errs.push(e.message)); pg.on("console", (m) => m.type() === "error" && !/fonts|favicon|Failed to load resource/.test(m.text()) && errs.push(m.text()));
+  await pg.route(/jsdelivr|googleapis|gstatic/, (r) => r.request().url().includes("supabase") ? r.fulfill({ contentType: "text/javascript", body: stub(who && ME[who]) }) : r.abort());
+  await pg.goto(base + p, { waitUntil: "load" }); await pg.waitForTimeout(500);
+  const info = await pg.evaluate(() => ({ dir: document.documentElement.dir, overflow: document.documentElement.scrollWidth > innerWidth + 1, text: document.body.innerText.length, spin: !!document.querySelector("#app .spin"), dead: [...document.querySelectorAll("a[href]")].map(a => a.getAttribute("href")).filter(h => !h.startsWith("http") && !h.startsWith("#")).map(h => h.split("#")[0]).filter(Boolean) }));
+  const dead = [...new Set(info.dead)].filter((h) => !fs.existsSync(path.join(root, h)));
+  res.push({ p: p + (who ? ":" + who : ""), w, rtl: info.dir === "rtl", overflow: info.overflow, rendered: !info.spin && info.text > 80, errs: errs.length, dead: dead.length });
+  if (errs.length) console.log(p, w, errs.slice(0, 3)); if (dead.length) console.log("dead links", p, dead);
+  if (w === 390 && (p === "index.html" || p === "admin.html")) await pg.screenshot({ path: `/tmp/shot-${p}-${w}.png`, fullPage: false });
+  await ctx.close();
+}
+await b.close(); srv.close();
+const bad = res.filter((r) => !r.rtl || r.overflow || !r.rendered || r.errs || r.dead);
+console.log(`${res.length} فحصاً، المخفق: ${bad.length}`); bad.forEach((r) => console.log(JSON.stringify(r)));
