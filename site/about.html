@@ -1,26 +1,18 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>عن أثر – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"></head>
+<title>عن أثر – أثر</title><meta name="description" content="التعريف بنظام أثر: سبب النشأة والمزايا والمستفيدون والبنية التقنية"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"><link rel="stylesheet" href="assets/about.css"></head>
 <body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script><script src="assets/about.js"></script>
 <script>
 (async () => { await A.loadMe(); await A.chrome("about.html");
-const ico = A.ico, app = A.$("#app"); app.className = "";
+const me = A.state.me, ico = A.ico, app = A.$("#app"); app.className = "";
 const chip = (i, t) => `<span class="h3chip">${ico(i)}${t}</span>`;
 app.innerHTML = `<section class="hero3"><div class="h3g"><div class="h3t"><span class="h3pill">${ico("info")}عن أثر</span>
-<h1><em>نظام</em> قياس الأثر</h1><p class="h3sub">جزء من منظومة النواة الرقمية</p>
-<p class="h3p">أثر يدير استبانات موجهة لخمس فئات، ويحوّل نتائجها إلى دراسة إلكترونية بتقرير وتوصيات تساعد الإدارة على اتخاذ قرارات تطوير مبنية على آراء أصحاب العلاقة، دون أن يكرر بيانات النواة أو يعدّل فيها.</p>
+<h1><em>نظام</em> قياس الأثر</h1><p class="h3sub">أحد أنظمة النواة الرقمية</p>
+<p class="h3p">أثر نظام يطبّق فكرة قياس أثر العملية التعليمية: استبانات قصيرة لكل فئة، ودراسة إلكترونية بتقرير وتوصيات، وجولات تتيح إعادة القياس، دون أن يكرر بيانات النواة أو يعدّل فيها.</p>
 <div class="h3chips">${chip("lock", "قراءة فقط من النواة")}${chip("key", "حساب واحد")}${chip("shield", "صلاحيات بالأدوار")}</div>
-<div class="h3act"><a class="btn" href="login.html">دخول المنسوبين</a><a class="btn ghost" href="help.html">المساعدة</a></div></div></div></section>
-<section class="sct"><h2>ما الذي يقدمه</h2><div class="grid">
-<div class="card"><b>استبانات لكل فئة</b><p>المتعلم والمعلم والهيئة الإدارية والجهة المشرفة وولي الأمر، وبكل فئة استبانة أو أكثر، بحد أقصى عشرة أسئلة، في محاور العملية التربوية والبيئة المدرسية والقيادة التعليمية.</p></div>
-<div class="card"><b>روابط عامة</b><p>يعبّئ المتعلم وولي الأمر والجهة المشرفة برابط بلا حساب، والاسم والبريد والجوال اختيارية.</p></div>
-<div class="card"><b>دراسة وتقرير وتوصيات</b><p>بعد الإغلاق تُنشأ الدراسة بالمتوسطات حسب المحور ونقاط القوة وفرص التحسين وتوصيات مرتبة بالأولوية، وتُراجَع وتُعتمد ثم تُطبع.</p></div>
-<div class="card"><b>الأدوار والصلاحيات</b><p>مدير النواة ومنسق أثر بكل الصلاحيات، ومدير المدرسة بصلاحيات عمل، والمنسوب يعبّئ استباناته ويرى دراساته المعتمدة.</p></div></div></section>
-<section class="sct alt"><h2>الخصوصية والأمان</h2><div class="grid">
-<div class="card"><b>إجابات مجمّعة</b><p>لا تُربط إجابات المنسوب باسمه، ولا تُعرض النتائج قبل بلوغ الحد الأدنى من المشاركين.</p></div>
-<div class="card"><b>حماية الإرسال</b><p>حد لعدد الإرسال من الشبكة الواحدة، وحقل فخ ضد الإرسال الآلي.</p></div>
-<div class="card"><b>فصل البيانات</b><p>الجداول لا تُقرأ مباشرة من المتصفح؛ كل وصول عبر دوال تتحقق من الصلاحية في الخادم.</p></div>
-<div class="card"><b>النواة مرجع للقراءة</b><p>يتحقق أثر من هوية المنسوب وفئته من النواة ولا يكتب فيها شيئاً. والتحليل أداة مساندة وليس تقويماً لأداء أحد.</p></div></div></section>`;
+<div class="h3act"><a class="btn" href="${me ? "dashboard.html" : "login.html"}">${me ? "لوحة التحكم" : "دخول المنسوبين"}</a><a class="btn ghost" href="index.html">الرئيسية</a></div></div></div></section><section class="sct" id="aboutBody"></section>`;
+document.getElementById("aboutBody").innerHTML = aboutPage(me);
+aboutInit(document.getElementById("aboutBody"));
 })();
 </script></body></html>
