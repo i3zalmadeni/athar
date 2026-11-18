@@ -1,30 +1,23 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>الرئيسية – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"></head>
+<title>أثر – قياس أثر العملية التعليمية</title><meta name="description" content="أثر: قياس أثر العملية التعليمية على المتعلم والمعلم وولي الأمر والقيادة المدرسية والجهة المشرفة في متوسطة لبيد بن ربيعة"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"><link rel="stylesheet" href="assets/home.css"></head>
 <body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script><script src="assets/home.js"></script>
 <script>
 (async () => { await A.loadMe(); await A.chrome("index.html");
 const me = A.state.me, ico = A.ico, app = A.$("#app"); app.className = "";
 const chip = (i, t) => `<span class="h3chip">${ico(i)}${t}</span>`;
+const row = (i, t, w, bg, bar) => `<div class="wrow"><div class="sq" style="background:${bg}">${hi(i)}</div><div class="wl"><small>${t}</small><div class="tr"><i style="width:${w}%;background:${bar}"></i></div></div></div>`;
 app.innerHTML = `<section class="hero3"><div class="h3g"><div class="h3t"><span class="h3pill">${ico("school")}أثر · النواة الرقمية</span>
-<h1><em>أثر</em></h1><p class="h3sub">قياس الأثر وإدارة الاستبانات</p>
-<p class="h3p">منظومة لمتوسطة لبيد بن ربيعة تجمع آراء المتعلمين والمعلمين والهيئة الإدارية والجهة المشرفة وأولياء الأمور في استبانات قصيرة عن العملية التربوية والبيئة المدرسية والقيادة التعليمية، ثم تحوّلها إلى دراسة وتقرير وتوصيات.</p>
-<div class="h3chips">${chip("key", "دخول موحد للمنسوبين")}${chip("lock", "بلا دخول لأولياء الأمور والطلاب")}${chip("shield", "إجابات مجمّعة")}${chip("info", "دراسة وتوصيات")}</div>
-<div class="h3act"><a class="btn" href="${me ? "dashboard.html" : "login.html"}">${me ? "لوحة التحكم" : "دخول المنسوبين"}</a><a class="btn ghost" href="about.html">عن أثر</a></div></div>
+<h1><em>أثر</em> التعليم<br>كما يراه من يعيشه</h1><p class="h3sub">قياس أثر العملية التعليمية في متوسطة لبيد بن ربيعة</p>
+<p class="h3p">يسمع أثر المتعلم والمعلم وولي الأمر والقيادة المدرسية والجهة المشرفة بمقياس واحد قصير، ثم يحوّل أصواتهم إلى دراسة بنقاط قوة وفرص تحسين وتوصيات تُبنى عليها قرارات التطوير.</p>
+<div class="h3chips">${chip("users", "خمسة أصوات")}${chip("chart", "عشرة أسئلة كحد أقصى")}${chip("shield", "إجابات مجمّعة")}${chip("info", "دراسة وتوصيات")}</div>
+<div class="h3act"><a class="btn" href="${me ? "dashboard.html" : "login.html"}">${me ? "لوحة التحكم" : "دخول المنسوبين"}</a><a class="btn ghost" href="#ahb-what" id="goAbout">تعرّف على أثر</a></div></div>
 <div class="illus" aria-hidden="true"><div class="win"><div class="dots"><i></i><i></i><i></i></div>
-<div class="wrow"><div class="sq" style="background:#cfe9ee"></div><div class="tr"><i style="width:82%;background:linear-gradient(90deg,#2f8f99,#5bbf8a)"></i></div></div>
-<div class="wrow"><div class="sq" style="background:#fbe9c4"></div><div class="tr"><i style="width:64%;background:linear-gradient(90deg,#f0b34a,#e29a2c)"></i></div></div>
-<div class="wrow"><div class="sq" style="background:#d9efe2"></div><div class="tr"><i style="width:46%;background:linear-gradient(90deg,#5bbf8a,#2a9d65)"></i></div></div></div>
-<div class="fl a">${ico("users")}</div><div class="fl b">${ico("school")}</div><div class="fl c">${ico("key")}</div></div></div></section>
-<section class="sct"><h2>كيف يعمل أثر</h2><div class="steps">
-<div class="card"><b>استبانة لكل فئة</b>خمس فئات: المتعلم والمعلم والهيئة الإدارية والجهة المشرفة وولي الأمر، بما لا يزيد على عشرة أسئلة في كل استبانة.</div>
-<div class="card"><b>تعبئة سهلة</b>يعبّئ المنسوبون من مكتبهم الإلكتروني بحساب النواة، ويعبّئ المتعلم وولي الأمر والجهة المشرفة برابط مباشر بلا دخول.</div>
-<div class="card"><b>دراسة وتوصيات</b>بعد الإغلاق تُنشأ دراسة إلكترونية بنقاط القوة وفرص التحسين وتوصيات، تعتمدها الإدارة وتظهر للمشاركين من المنسوبين.</div></div></section>
-<section class="sct"><h2>الفئات المستهدفة</h2><div class="grid">
-<div class="card"><span class="ic">${ico("users")}</span><b>المتعلم وولي الأمر</b><p>رابط مباشر بلا حساب، والاسم والبريد والجوال اختيارية.</p></div>
-<div class="card"><span class="ic">${ico("school")}</span><b>المعلم والهيئة الإدارية</b><p>دخول بحساب النواة، وتظهر لكل فئة استباناتها ودراساتها.</p></div>
-<div class="card"><span class="ic">${ico("user")}</span><b>الجهة المشرفة</b><p>رابط مباشر بلا دخول لتقويم واقع المدرسة.</p></div>
-<div class="card"><span class="ic">${ico("shield")}</span><b>الإدارة</b><p>مدير النواة ومنسق أثر يملكان الصلاحية الكاملة لإدارة الاستبانات والدراسات.</p></div></div></section>`;
+${row("school", "العملية التعليمية", 82, "#cfe9ee", "linear-gradient(90deg,#2f8f99,#5bbf8a)")}${row("building", "البيئة المدرسية", 64, "#fbe9c4", "linear-gradient(90deg,#f0b34a,#e29a2c)")}${row("star", "القيادة التعليمية", 46, "#d9efe2", "linear-gradient(90deg,#5bbf8a,#2a9d65)")}</div>
+<div class="fl a">${ico("users")}</div><div class="fl b">${ico("family")}</div><div class="fl c">${ico("chart")}</div></div></div></section><section class="sct" id="homeBody"></section>`;
+document.getElementById("homeBody").innerHTML = homePage(me);
+homeInit(document.getElementById("homeBody"));
+document.getElementById("goAbout").onclick = (e) => { e.preventDefault(); document.getElementById("ahb-what").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); };
 })();
 </script></body></html>
