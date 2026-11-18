@@ -2,7 +2,7 @@
 <title>نموذج التعبئة – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"></head>
 <body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script><script src="assets/survey-ui.js"></script>
 <script>
 (async () => {
   const { $, esc, sb, msg } = A; await A.chrome("form.html");
@@ -10,29 +10,9 @@
   const card = (h) => { $("#app").innerHTML = `<div class="auth wide"><div class="card">${h}</div></div>`; };
   let info = null; try { info = (await sb.rpc("athar_public_survey_info", { p_token: tok })).data; } catch (_) {}
   if (!info || !info.valid) { card('<h2>الاستبانة غير متاحة</h2><div class="alert bad">الرابط غير صالح أو أن الاستبانة أُغلقت. اطلب رابطاً جديداً من المدرسة.</div>'); return; }
-  const AUD = { student: "المتعلم", parent: "ولي الأمر", supervisor: "الجهة المشرفة" };
-  const q = (x, i) => `<div class="qcard" data-q="${x.id}" data-k="${x.kind}"><h4>${i + 1}. ${esc(x.prompt)} ${x.required ? '<span class="badge warn">مطلوب</span>' : ""}</h4>` +
-    (x.kind === "scale" ? `<div class="scale">${(x.options || ["1","2","3","4"]).map((t, n) => `<label><input type="radio" name="q${i}" value="${n + 1}">${esc(t)}</label>`).join("")}</div>`
-    : x.kind === "choice" ? `<div class="scale">${x.options.map((o, k) => `<label><input type="radio" name="q${i}" value="${k}">${esc(o)}</label>`).join("")}</div>`
-    : `<textarea name="q${i}" maxlength="1000" rows="3" placeholder="اكتب رأيك"></textarea>`) + "</div>";
-  card(`<h2>${esc(info.title)}</h2><p class="sub">${esc(A.C.schoolName)} · ${AUD[info.audience] || ""}</p>${info.description ? `<p>${esc(info.description)}</p>` : ""}
-  <div class="alert info">لا حاجة لتسجيل الدخول. إجاباتك تُجمَّع في دراسة تحليلية لتحسين التعليم والبيئة المدرسية.</div>
-  <form id="f" novalidate>${info.questions.map(q).join("")}
-  <h3 class="sec">بيانات اختيارية</h3><p class="hint">يمكنك تركها فارغة. إن أدخلتها فقد تتواصل المدرسة معك عند الحاجة.</p>
-  <div class="fg"><div><label for="nm">الاسم</label><input id="nm" maxlength="100" autocomplete="name"></div><div><label for="em">البريد الإلكتروني</label><input id="em" type="email" dir="ltr" maxlength="120" autocomplete="email"></div>
-  <div><label for="ph">رقم الجوال</label><input id="ph" dir="ltr" inputmode="tel" maxlength="20" autocomplete="tel"></div></div>
-  <div class="hp" aria-hidden="true"><label>الموقع<input id="web" tabindex="-1" autocomplete="off"></label></div>
-  <p class="err" id="m" role="alert"></p><button class="btn block" id="go">إرسال الإجابات</button></form>`);
-  $("#f").onsubmit = async (e) => { e.preventDefault(); const m = $("#m"), b = $("#go"); m.textContent = ""; const ans = {};
-    for (const [i, x] of info.questions.entries()) { const el = document.querySelector(`[data-q="${x.id}"]`); let v = null;
-      if (x.kind === "text") v = el.querySelector("textarea").value.trim(); else { const c = el.querySelector("input:checked"); v = c ? Number(c.value) : null; }
-      if ((v === null || v === "") && x.required) { m.textContent = `أجب عن السؤال ${i + 1}.`; el.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-      if (v !== null && v !== "") ans[x.id] = v; }
-    const v = (i) => ($("#" + i).value || "").trim();
-    b.disabled = true;
-    const { data, error } = await sb.rpc("athar_public_survey_submit", { p_token: tok, p_payload: { answers: ans, name: v("nm"), email: v("em"), phone: v("ph"), website: v("web") } });
-    if (error || !data || !data.ok) { b.disabled = false; m.textContent = msg(error || { message: data && data.error }); return; }
-    card('<h2>شكراً لمشاركتك</h2><div class="alert ok">استُلمت إجاباتك. رأيك يساهم في تحسين المدرسة.</div>'); };
+  SV.render($("#app"), info, { school: A.C.schoolName, contact: true,
+    submit: async (ans, ex) => { const { data, error } = await sb.rpc("athar_public_survey_submit", { p_token: tok, p_payload: { answers: ans, ...ex } });
+      if (error || !data || !data.ok) throw new Error(msg(error || { message: data && data.error })); } });
 })();
 </script>
 </body></html>

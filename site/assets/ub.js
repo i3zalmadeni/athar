@@ -29,7 +29,6 @@ function ubShortName(n) {
 // أنظمة النواة الرقمية: [المسار على الموقع، الاسم، الأيقونة، الوصف]. كلها على أصل واحد فالدخول مشترك،
 // والرابط يفتح «مكتبي الإلكتروني» في لوحة تحكم النظام مباشرة
 const UB_SYS = [
-  ["athar/dashboard.html", "أثر", "inbox", "الاستبانات والتسجيل والتحقق"],
   ["digital-core/dashboard.html", "النواة الرقمية", "layers", "الهوية الموحدة والسجلات"],
   ["self-evaluation/admin.html", "التقويم المدرسي الذكي", "check", "المؤشرات والشواهد والتقييم"],
   ["smart-plans/#dashboard", "الخطط الذكية", "cal", "الخطط والبرامج وتوثيقها"],
@@ -37,6 +36,7 @@ const UB_SYS = [
   ["indibati/dashboard.html", "انضباطي", "clock", "الحضور والغياب والتأخر"],
   ["qiyami/dashboard.html", "قيمي", "star", "النقاط والأوسمة والسلوك"],
   ["facility-booking/dashboard.html", "احجز مرفق", "building", "حجز المرافق والقاعات"],
+  ["athar/dashboard.html", "أثر", "chart", "قياس الأثر وإدارة الاستبانات"],
   ["report/desk.html", "مرآة | الملف الشامل", "eye", "الملف الشامل للمتعلم والمعلم"],
 ];
 const ubSysHTML = () => { const cur = location.pathname.split("/").filter(Boolean)[0] || "";
