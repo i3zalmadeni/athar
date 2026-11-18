@@ -63,9 +63,9 @@
           <div><small class="hint">آخر تحقق ناجح</small><div>${fmt(c.last_ok_at)}</div></div><div><small class="hint">منسوبون مرتبطون</small><div>${c.linked_staff}</div></div></div>${c.last_error ? `<div class="alert bad mt">${esc(c.last_error)}</div>` : ""}</div>`; }
       if (can("settings:manage")) { const S = await rpc("admin_settings");
         h += `<h3 class="sec">إعدادات النظام</h3>` + S.map(s => `<div class="item"><div class="row2"><div><b>${esc(s.description || s.key)}</b><div class="hint" dir="ltr" style="text-align:right">${esc(s.key)}</div></div>
-          ${typeof s.value === "boolean" ? `<input type="checkbox" style="width:auto" data-k="${s.key}" ${s.value ? "checked" : ""}>` : `<input type="number" style="width:90px" data-k="${s.key}" value="${esc(s.value)}">`}</div></div>`).join(""); }
+          ${typeof s.value === "boolean" ? `<input type="checkbox" style="width:auto" data-k="${s.key}" ${s.value ? "checked" : ""}>` : `<input ${typeof s.value === "string" ? 'type="text" dir="ltr" style="width:170px"' : 'type="number" style="width:90px"'} data-k="${s.key}" value="${esc(s.value)}">`}</div></div>`).join(""); }
       $("#pane").innerHTML = h;
-      document.querySelectorAll("[data-k]").forEach(i => i.onchange = async () => { const v = i.type === "checkbox" ? i.checked : Number(i.value); if (!(await act(() => rpc("admin_set_setting", { p_key: i.dataset.k, p_value: v })))) load(); }); },
+      document.querySelectorAll("[data-k]").forEach(i => i.onchange = async () => { const v = i.type === "checkbox" ? i.checked : i.type === "text" ? i.value.trim() : Number(i.value); if (!(await act(() => rpc("admin_set_setting", { p_key: i.dataset.k, p_value: v })))) load(); }); },
   };
   async function rolesModal(a, done) { const R = await rpc("admin_roles"), cand = R.roles.filter(r => !r.user_type || r.user_type === a.user_type);
     const o = modal(`<h3>أدوار ${esc(a.display_name)}</h3>${cand.map(r => `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto" value="${r.code}" ${a.roles.includes(r.code) ? "checked" : ""}>${esc(r.name_ar)}</label>`).join("")}<div class="acts mt"><button class="btn" id="sv">حفظ</button><button class="btn sec" id="cx">إلغاء</button></div>`);
