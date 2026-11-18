@@ -15,22 +15,53 @@ const dir = () => location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
   const DOM = { process: "العملية التربوية", environment: "البيئة المدرسية", leadership: "الإدارة والقيادة" };
   const shortLink = (x) => dir() + "s/" + x.token, staffLink = (x) => dir() + "survey.html?id=" + x.id;
 
-  async function load() {
-    let L; try { L = await rpc("admin_surveys"); } catch (x) { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div>`; return; }
-    $("#app").innerHTML = `<div class="bar"><button class="btn" id="ns">استبانة جديدة</button></div>
-      <p class="hint">الأسئلة موضوعية باختيار من أربع عبارات، وبحد أقصى 10 أسئلة. المعلم والهيئة الإدارية يجدان استباناتهما في مكتبهما الإلكتروني، أما المتعلم وولي الأمر والجهة المشرفة فبرابط مختصر يُرسل لهم.</p>` +
-      Object.keys(AUD).map((a) => { const rows = L.filter((x) => x.audience === a); return `<h3 class="sec">${AUD[a]}</h3>` + table(["العنوان", "الحالة", "الأسئلة", "الاستجابات", ""], rows.map((x) => `<tr><td><b>${esc(x.title)}</b>${x.token && PUB.includes(a) ? `<div class="hint" dir="ltr" style="text-align:right">/s/${esc(x.token)}</div>` : ""}</td><td><span class="badge ${ST[x.status][1]}">${ST[x.status][0]}</span></td><td>${x.questions}</td><td>${x.responses}</td>
-        <td class="acts">${x.status === "draft" ? `<button class="btn sm sec" data-e="${x.id}">تعديل</button><a class="btn sm sec" href="survey.html?id=${x.id}">معاينة</a>` : ""}${x.status !== "closed" ? `<button class="btn sm sec" data-p="${x.id}">نشر ومشاركة</button>` : ""}${x.status === "draft" ? `<button class="btn sm" data-o="${x.id}">فتح للتعبئة</button><button class="btn sm bad" data-x="${x.id}">حذف</button>` : ""}${x.status === "open" ? `<button class="btn sm bad" data-c="${x.id}">إغلاق</button>` : ""}${x.status !== "draft" ? `<a class="btn sm sec" href="studies-admin.html">النتائج والدراسة</a>` : ""}${PUB.includes(a) && x.status !== "draft" ? `<button class="btn sm sec" data-r="${x.id}">بيانات المشاركين</button>` : ""}</td></tr>`).join("")); }).join("");
-    $("#ns").onclick = () => builder(null);
+  // حالة الفرز والبحث تُحفظ في الرابط ليسهل الرجوع إليها
+  const F = { a: (location.hash.slice(1).split("&")[0] || "all"), s: "all", q: "" }; if (F.a !== "all" && !AUD[F.a]) F.a = "all";
+  let L = [], open_ = null; const cache = {};
+  const AICON = { student: "users", teacher: "school", administrative: "shield", supervisor: "info", parent: "user" };
+  const pct = (x) => { const t = x.target_count; return t ? Math.min(100, Math.round(100 * x.responses / t)) : null; };
+  const card = (x) => { const p = pct(x), pub = PUB.includes(x.audience), isOpen = open_ === x.id;
+    return `<article class="scard ${x.status} ${isOpen ? "ex" : ""}" data-id="${x.id}"><div class="sc-h" data-t="${x.id}" role="button" tabindex="0" aria-expanded="${isOpen}">
+      <span class="sc-i">${A.ico(AICON[x.audience])}</span><div class="sc-m"><b>${esc(x.title)}</b><small>${AUD[x.audience]} · ${x.questions} أسئلة</small></div><span class="badge ${ST[x.status][1]}">${ST[x.status][0]}</span></div>
+      <div class="sc-s"><div><b>${x.responses}</b><span>استجابة${x.target_count ? " من " + x.target_count : ""}</span></div>${p !== null ? `<div class="prog" aria-label="${p}%"><i style="width:${p}%"></i></div><em>${p}%</em>` : ""}</div>
+      ${pub && x.token && x.status !== "closed" ? `<div class="sc-l"><code dir="ltr">${esc(dir().replace(/^https?:\/\//, ""))}s/${esc(x.token)}</code><button class="btn sm sec" data-cp="${x.id}">نسخ</button></div>` : ""}
+      <div class="sc-a">${x.status === "draft" ? `<button class="btn sm" data-o="${x.id}">فتح للتعبئة</button><button class="btn sm sec" data-e="${x.id}">تعديل</button>` : ""}${x.status !== "closed" ? `<button class="btn sm sec" data-p="${x.id}">نشر ومشاركة</button>` : ""}${x.status === "open" ? `<button class="btn sm bad" data-c="${x.id}">إغلاق</button>` : ""}${x.status !== "draft" ? `<a class="btn sm sec" href="studies-admin.html">النتائج والدراسة</a>` : ""}${x.status === "draft" ? `<button class="btn sm bad" data-x="${x.id}">حذف</button>` : ""}</div>
+      ${isOpen ? `<div class="sc-q" id="q-${x.id}"><span class="spin"></span></div>` : ""}</article>`; };
+  function paint() {
+    const base = L.filter((x) => (F.s === "all" || x.status === F.s) && (!F.q || (x.title + AUD[x.audience]).includes(F.q))), rows = base.filter((x) => F.a === "all" || x.audience === F.a);
+    const cnt = (a) => L.filter((x) => (a === "all" || x.audience === a) && (F.s === "all" || x.status === F.s) && (!F.q || (x.title + AUD[x.audience]).includes(F.q))).length;
+    const sc = (st) => L.filter((x) => st === "all" || x.status === st).length;
+    $("#lst").innerHTML = `<div class="seg" role="tablist" aria-label="الفئة">${["all", ...Object.keys(AUD)].map((a) => `<button role="tab" aria-selected="${F.a === a}" data-a="${a}" class="${F.a === a ? "on" : ""}">${a === "all" ? "كل الفئات" : AUD[a]}<span>${cnt(a)}</span></button>`).join("")}</div>
+      <div class="bar"><input id="q" type="search" placeholder="بحث في الاستبانات" value="${esc(F.q)}" style="flex:1;min-width:180px"><div class="chips">${[["all", "الكل"], ["draft", "مسودة"], ["open", "مفتوحة"], ["closed", "مغلقة"]].map(([k, n]) => `<button data-s="${k}" class="${F.s === k ? "on" : ""}">${n} <span>${sc(k)}</span></button>`).join("")}</div></div>
+      ${rows.length ? `<div class="sgrid">${rows.map(card).join("")}</div>` : `<div class="empty">لا توجد استبانات مطابقة. ${F.a !== "all" ? `<button class="btn sm" id="nn">إنشاء استبانة ${AUD[F.a]}</button>` : ""}</div>`}`;
+    document.querySelectorAll("[data-a]").forEach((b) => b.onclick = () => { F.a = b.dataset.a; history.replaceState(null, "", "#" + F.a); paint(); });
+    document.querySelectorAll("[data-s]").forEach((b) => b.onclick = () => { F.s = b.dataset.s; paint(); });
+    const q = $("#q"); q.oninput = () => { F.q = q.value.trim(); const pos = q.selectionStart; paint(); const n = $("#q"); n.focus(); n.setSelectionRange(pos, pos); };
+    const nn = $("#nn"); if (nn) nn.onclick = () => builder(null, F.a);
     const by = (id) => L.find((x) => x.id === id);
+    document.querySelectorAll("[data-t]").forEach((h) => { const go = async () => { const id = h.dataset.t; open_ = open_ === id ? null : id; paint(); if (open_) preview(open_); }; h.onclick = go; h.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }; });
+    document.querySelectorAll(".sc-a,.sc-l").forEach((e) => e.onclick = (ev) => ev.stopPropagation());
+    document.querySelectorAll("[data-cp]").forEach((b) => b.onclick = () => copy(shortLink(by(b.dataset.cp))));
     document.querySelectorAll("[data-e]").forEach((b) => b.onclick = () => builder(b.dataset.e));
     document.querySelectorAll("[data-p]").forEach((b) => b.onclick = () => share(by(b.dataset.p)));
-    document.querySelectorAll("[data-o]").forEach((b) => b.onclick = async () => { if (confirm("تُفتح الاستبانة للتعبئة" + (PUB.includes(by(b.dataset.o).audience) ? "" : " ويُشعَر المعنيون من المنسوبين") + ". متابعة؟") && await act(() => rpc("admin_set_survey_status", { p_id: b.dataset.o, p_status: "open" }), "فُتحت الاستبانة")) { await load(); const x = (await rpc("admin_surveys")).find((y) => y.id === b.dataset.o); if (x) share(x); } });
+    document.querySelectorAll("[data-o]").forEach((b) => b.onclick = async () => { if (confirm("تُفتح الاستبانة للتعبئة" + (PUB.includes(by(b.dataset.o).audience) ? "" : " ويُشعَر المعنيون من المنسوبين") + ". متابعة؟") && await act(() => rpc("admin_set_survey_status", { p_id: b.dataset.o, p_status: "open" }), "فُتحت الاستبانة")) { await load(); const x = by(b.dataset.o); if (x) share(x); } });
     document.querySelectorAll("[data-c]").forEach((b) => b.onclick = async () => { if (confirm("بعد الإغلاق لا تقبل إجابات ويتوقف الرابط. متابعة؟") && await act(() => rpc("admin_set_survey_status", { p_id: b.dataset.c, p_status: "closed" }), "أُغلقت الاستبانة")) load(); });
-    document.querySelectorAll("[data-x]").forEach((b) => b.onclick = async () => { if (confirm("حذف المسودة نهائياً؟") && await act(() => rpc("admin_delete_survey", { p_id: b.dataset.x }))) load(); });
-    document.querySelectorAll("[data-r]").forEach((b) => b.onclick = async () => { try { const r = await rpc("admin_respondents", { p_id: b.dataset.r });
-      const o = modal(`<h3>بيانات المشاركين الاختيارية</h3><p class="hint">${r.total} مشاركاً، منهم ${r.with_contact.length} أدخلوا بيانات تواصل.</p>${table(["الاسم", "البريد", "الجوال"], r.with_contact.map((c) => `<tr><td>${esc(c.name || "—")}</td><td dir="ltr">${esc(c.email || "—")}</td><td dir="ltr">${esc(c.phone || "—")}</td></tr>`).join(""))}<div class="acts mt"><button class="btn sec" id="cx">إغلاق</button></div>`);
-      o.querySelector("#cx").onclick = () => o.remove(); } catch (x) { toast(msg(x), true); } });
+    document.querySelectorAll("[data-x]").forEach((b) => b.onclick = async () => { if (confirm("حذف المسودة نهائياً؟") && await act(() => rpc("admin_delete_survey", { p_id: b.dataset.x }))) { open_ = null; load(); } });
+  }
+  async function preview(id) { const box = () => document.getElementById("q-" + id); try { const d = cache[id] || (cache[id] = await rpc("admin_get_survey", { p_id: id })); const el = box(); if (!el) return;
+    el.innerHTML = d.questions.map((q, i) => `<div class="pq"><b>${i + 1}. ${esc(q.prompt)}</b><div class="hint">${DOM[q.domain] || ""}</div><div class="pq-o">${(q.options || []).map((t, k) => `<span>${k + 1} ${esc(t)}</span>`).join("")}</div></div>`).join("") +
+      (PUB.includes(d.audience) && d.status !== "draft" ? `<div class="acts"><button class="btn sm sec" data-r="${id}">بيانات المشاركين</button></div>` : "");
+    const r = el.querySelector("[data-r]"); if (r) r.onclick = async () => { try { const x = await rpc("admin_respondents", { p_id: id });
+      const o = modal(`<h3>بيانات المشاركين الاختيارية</h3><p class="hint">${x.total} مشاركاً، منهم ${x.with_contact.length} أدخلوا بيانات تواصل.</p>${table(["الاسم", "البريد", "الجوال"], x.with_contact.map((c) => `<tr><td>${esc(c.name || "—")}</td><td dir="ltr">${esc(c.email || "—")}</td><td dir="ltr">${esc(c.phone || "—")}</td></tr>`).join(""))}<div class="acts mt"><button class="btn sec" id="cx">إغلاق</button></div>`);
+      o.querySelector("#cx").onclick = () => o.remove(); } catch (e) { toast(msg(e), true); } }; } catch (e) { const el = box(); if (el) el.innerHTML = `<div class="alert bad">${esc(msg(e))}</div>`; } }
+  async function load() {
+    try { L = await rpc("admin_surveys"); } catch (x) { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div>`; return; }
+    for (const k in cache) delete cache[k];
+    if (!$("#lst")) { $("#app").innerHTML = `<div id="sum"></div><div id="lst"></div>`; }
+    const n = (f) => L.filter(f).length;
+    $("#sum").innerHTML = `<div class="grid"><div class="stat"><b>${L.length}</b><span>استبانات</span></div><div class="stat"><b>${n((x) => x.status === "open")}</b><span>مفتوحة الآن</span></div><div class="stat"><b>${n((x) => x.status === "draft")}</b><span>مسودات</span></div><div class="stat"><b>${L.reduce((a, x) => a + x.responses, 0)}</b><span>إجمالي الاستجابات</span></div></div><div class="bar"><button class="btn" id="ns">استبانة جديدة</button></div>`;
+    $("#ns").onclick = () => builder(null, F.a !== "all" ? F.a : null);
+    paint();
   }
 
   // نشر ومشاركة: رابط مختصر قابل للتحديد + إرسال بواتساب ورسالة وبريد
@@ -54,8 +85,8 @@ const dir = () => location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
     const o = modal(""); draw(x);
   }
 
-  async function builder(id) {
-    const cur = id ? await rpc("admin_get_survey", { p_id: id }) : { title: "", description: "", audience: "teacher", required: true, closes_at: null, target_count: null, questions: [{ kind: "scale", domain: "process", prompt: "", options: PH.agree[1], required: true }] };
+  async function builder(id, aud) {
+    const cur = id ? await rpc("admin_get_survey", { p_id: id }) : { title: "", description: "", audience: aud || "teacher", required: true, closes_at: null, target_count: null, questions: [{ kind: "scale", domain: "process", prompt: "", options: PH.agree[1], required: true }] };
     const Q = cur.questions.filter((q) => q.kind === "scale").map((q) => ({ ...q, options: q.options && q.options.length === 4 ? q.options : PH.agree[1] }));
     const o = modal(`<h3>${id ? "تعديل الاستبانة" : "استبانة جديدة"}</h3><label for="sa">الفئة المستهدفة</label><select id="sa">${Object.keys(AUD).map((k) => `<option value="${k}" ${cur.audience === k ? "selected" : ""}>${AUD[k]}</option>`).join("")}</select>
       <label for="st">العنوان</label><input id="st" maxlength="160" value="${esc(cur.title)}"><label for="sd">وصف (اختياري)</label><textarea id="sd" maxlength="1000">${esc(cur.description || "")}</textarea>
