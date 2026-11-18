@@ -13,7 +13,7 @@
   const ask = (t) => prompt(t) ;
 
   function shell() {
-    $("#app").innerHTML = `<h2>الإدارة</h2><p class="sub">طوابير العمل والصلاحيات وسجل العمليات.</p><div class="tabs">${TABS.map(t => `<button data-t="${t[0]}" class="${t[0] === cur ? "on" : ""}">${t[1]}</button>`).join("")}</div><div id="pane"><div class="empty"><span class="spin"></span></div></div>`;
+    $("#app").innerHTML = `<div class="tabs">${TABS.map(t => `<button data-t="${t[0]}" class="${t[0] === cur ? "on" : ""}">${t[1]}</button>`).join("")}</div><div id="pane"><div class="empty"><span class="spin"></span></div></div>`;
     document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { cur = b.dataset.t; location.hash = cur; shell(); load(); });
   }
   const rowAcct = (a, extra) => `<tr><td><b>${esc(a.display_name)}</b><div class="hint" dir="ltr" style="text-align:right">${esc(a.login_id)}</div></td><td>${A.TYPE_AR[a.user_type]}</td><td>${badge(a.status)}</td><td>${esc((a.roles || []).map(r => ROLE_AR[r] || r).join("، "))}</td><td>${fmt(a.created_at)}</td><td class="acts">${extra}</td></tr>`;

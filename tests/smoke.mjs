@@ -10,17 +10,17 @@ const stub = (me) => `window.supabase={createClient:()=>({auth:{getSession:async
 const ME = { staff: { id: "s", login_id: "t_admin", display_name: "[اختبار] مدير", user_type: "staff", status: "active", roles: [{ code: "admin", name_ar: "مدير النظام" }], permissions: ["accounts:view","accounts:approve","accounts:manage","intake:manage","roles:manage","links:review","students:view","students:verify","audit:view","settings:manage","integration:view"], unread: 1, core_mode: "db", staff_link: { core_source: "db", verified_at: new Date().toISOString() }, profile: {} }
 };
 const b = await chromium.launch(), res = []; const sizes = [[390, 800], [820, 1000], [1366, 800]];
-const pages = [["index.html", null], ["login.html", null], ["form.html?t=stu", null], ["form.html?t=par", null], ["help.html", null], ["dashboard.html", "staff"], ["admin.html", "staff"], ["profile.html", "staff"], ["notifications.html", "staff"]];
+const pages = [["index.html", null], ["login.html", null], ["form.html?t=stu", null], ["form.html?t=par", null], ["help.html", null], ["about.html", null], ["dashboard.html", "staff"], ["admin.html", "staff"], ["profile.html", "staff"], ["notifications.html", "staff"]];
 for (const [p, who] of pages) for (const [w, h] of sizes) {
   const ctx = await b.newContext({ viewport: { width: w, height: h } }), pg = await ctx.newPage(), errs = [];
   pg.on("pageerror", (e) => errs.push(e.message)); pg.on("console", (m) => m.type() === "error" && !/fonts|favicon|Failed to load resource/.test(m.text()) && errs.push(m.text()));
   await pg.route(/jsdelivr|googleapis|gstatic/, (r) => r.request().url().includes("supabase") ? r.fulfill({ contentType: "text/javascript", body: stub(who && ME[who]) }) : r.abort());
-  await pg.goto(base + p, { waitUntil: "load" }); await pg.waitForTimeout(500);
+  await pg.goto(base + p, { waitUntil: "load" }); await pg.waitForTimeout(1600);
   const info = await pg.evaluate(() => ({ dir: document.documentElement.dir, overflow: document.documentElement.scrollWidth > innerWidth + 1, text: document.body.innerText.length, spin: !!document.querySelector("#app .spin"), dead: [...document.querySelectorAll("a[href]")].map(a => a.getAttribute("href")).filter(h => !h.startsWith("http") && !h.startsWith("#")).map(h => h.split("#")[0]).filter(Boolean) }));
   const dead = [...new Set(info.dead)].filter((h) => !fs.existsSync(path.join(root, h)));
   res.push({ p: p + (who ? ":" + who : ""), w, rtl: info.dir === "rtl", overflow: info.overflow, rendered: !info.spin && info.text > 80, errs: errs.length, dead: dead.length });
   if (errs.length) console.log(p, w, errs.slice(0, 3)); if (dead.length) console.log("dead links", p, dead);
-  if (w === 390 && (p === "index.html" || p === "admin.html")) await pg.screenshot({ path: `/tmp/shot-${p}-${w}.png`, fullPage: false });
+  if ((w === 390 || w === 1366) && ["index.html","dashboard.html","admin.html","about.html"].includes(p)) await pg.screenshot({ path: `/tmp/shot-${p}-${w}.png`, fullPage: false });
   await ctx.close();
 }
 await b.close(); srv.close();

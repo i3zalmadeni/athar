@@ -1,0 +1,26 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>عن أثر – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"></head>
+<body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/app.js"></script>
+<script>
+(async () => { await A.loadMe(); await A.chrome("about.html");
+const ico = A.ico, app = A.$("#app"); app.className = "";
+const chip = (i, t) => `<span class="h3chip">${ico(i)}${t}</span>`;
+app.innerHTML = `<section class="hero3"><div class="h3g"><div class="h3t"><span class="h3pill">${ico("info")}عن أثر</span>
+<h1><em>نظام</em> التسجيل والتحقق</h1><p class="h3sub">جزء من منظومة النواة الرقمية</p>
+<p class="h3p">أثر يجمع بيانات الطلاب وأولياء الأمور من المصدر مباشرة عبر روابط محدودة، ويضع بين يدي الإدارة أدوات المراجعة والاعتماد، دون أن يكرر بيانات النواة أو يعدّل فيها.</p>
+<div class="h3chips">${chip("lock", "قراءة فقط من النواة")}${chip("key", "حساب واحد")}${chip("shield", "صلاحيات بالأدوار")}</div>
+<div class="h3act"><a class="btn" href="login.html">دخول المنسوبين</a><a class="btn ghost" href="help.html">المساعدة</a></div></div></div></section>
+<section class="sct"><h2>ما الذي يقدمه</h2><div class="grid">
+<div class="card"><b>روابط التعبئة</b><p>رابط للطلاب ورابط لأولياء الأمور، بوصف وتاريخ انتهاء وحد استخدام، ويمكن إيقافه وتفعيله ونسخه.</p></div>
+<div class="card"><b>التحقق</b><p>مراجعة بيانات الطلاب واعتماد صلة أولياء الأمور بأبنائهم، مع ملاحظة للقرار.</p></div>
+<div class="card"><b>الأدوار والصلاحيات</b><p>مدير النواة ومنسق أثر بكل الصلاحيات، ومدير المدرسة وشؤون الطلاب بصلاحيات عمل، والمنسوب بصلاحيات حسابه.</p></div>
+<div class="card"><b>الإشعارات وسجل العمليات</b><p>إشعارات للمختصين عند وصول طلب، وسجل بقيم قبل وبعد لكل إجراء حساس.</p></div></div></section>
+<section class="sct alt"><h2>الخصوصية والأمان</h2><div class="grid">
+<div class="card"><b>بلا حسابات للطلاب</b><p>لا تُنشأ حسابات ولا كلمات مرور للطلاب أو أولياء الأمور.</p></div>
+<div class="card"><b>حماية الإرسال</b><p>حد لعدد الإرسال من الجهاز الواحد، وحقل فخ ضد الإرسال الآلي.</p></div>
+<div class="card"><b>فصل البيانات</b><p>الجداول لا تُقرأ مباشرة من المتصفح؛ كل وصول عبر دوال تتحقق من الصلاحية في الخادم.</p></div>
+<div class="card"><b>النواة مرجع للقراءة</b><p>يتحقق أثر من هوية المنسوب وحالته من النواة ولا يكتب فيها شيئاً.</p></div></div></section>`;
+})();
+</script></body></html>
