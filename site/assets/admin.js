@@ -3,7 +3,7 @@
   if (!(await A.guard("admin.html", ["staff"]))) return;
   const { esc, rpc, $, fmt, can, badge, msg, toast, sb } = A, me = A.state.me;
   if (me.status !== "active") { $("#app").innerHTML = A.statusScreen(me); return; }
-  const TABS = [["intake","روابط التعبئة","intake:manage"],["links","ربط أولياء الأمور","links:review"],["students","الطلاب","students:view"],["accounts","حسابات المنسوبين","accounts:view"],
+  const TABS = [["intake","روابط التعبئة","intake:manage"],["links","ربط أولياء الأمور","links:review"],["students","الطلاب","students:view"],["surveys","الاستبانات","surveys:manage"],["accounts","حسابات المنسوبين","accounts:view"],
     ["roles","الأدوار والصلاحيات","roles:manage"],["audit","سجل العمليات","audit:view"],["settings","الإعدادات والتكامل","settings:manage"]].filter(t => can(t[2]) || (t[0] === "settings" && can("integration:view")));
   if (!TABS.length) { $("#app").innerHTML = '<div class="alert bad">ليست لديك صلاحيات إدارية.</div>'; return; }
   const ROLE_AR = {}; me.roles.forEach(r => ROLE_AR[r.code] = r.name_ar);
@@ -47,6 +47,15 @@
           <td class="acts">${can("students:verify") && s.verification_status !== "verified" ? `<button class="btn sm" data-v="verified" data-id="${s.id}">تحقق</button>` : ""}${can("students:verify") && s.verification_status === "unverified" ? `<button class="btn sm bad" data-v="rejected" data-id="${s.id}">رفض</button>` : ""}</td></tr>`).join(""));
         document.querySelectorAll("[data-v]").forEach(b => b.onclick = async () => { if (await act(() => rpc("admin_student_verify", { p_student: b.dataset.id, p_decision: b.dataset.v }))) go(); }); };
       $("#q").oninput = go; go(); },
+    async surveys() { const L = await rpc("admin_surveys"), ST = { draft: ["مسودة", ""], open: ["مفتوحة", "ok"], closed: ["مغلقة", "info"] };
+      $("#pane").innerHTML = `<div class="bar"><button class="btn" id="ns">استبانة جديدة</button></div><p class="hint">النتائج مجمّعة ولا تُعرض قبل بلوغ الحد الأدنى للمشاركين. تظهر للمشارك بعد إغلاق الاستبانة.</p>` +
+        table(["العنوان", "الحالة", "الأسئلة", "المشاركون", "الموعد", ""], L.map(x => `<tr><td><b>${esc(x.title)}</b>${x.required ? ' <span class="badge warn">مطلوبة</span>' : ""}</td><td><span class="badge ${ST[x.status][1]}">${ST[x.status][0]}</span></td><td>${x.questions}</td><td>${x.participants}</td><td>${x.closes_at ? fmt(x.closes_at) : "—"}</td>
+          <td class="acts">${x.status === "draft" ? `<button class="btn sm sec" data-e="${x.id}">تعديل</button><button class="btn sm" data-o="${x.id}">فتح للتعبئة</button><button class="btn sm bad" data-x="${x.id}">حذف</button>` : ""}${x.status === "open" ? `<button class="btn sm bad" data-c="${x.id}">إغلاق</button>` : ""}${x.status !== "draft" ? `<a class="btn sm sec" href="survey-results.html?id=${x.id}">النتائج</a>` : ""}</td></tr>`).join(""));
+      $("#ns").onclick = () => builder(null);
+      document.querySelectorAll("[data-e]").forEach(b => b.onclick = () => builder(b.dataset.e));
+      document.querySelectorAll("[data-o]").forEach(b => b.onclick = async () => { if (confirm("تُفتح الاستبانة ويُشعَر المنسوبون. متابعة؟") && await act(() => rpc("admin_set_survey_status", { p_id: b.dataset.o, p_status: "open" }), "فُتحت الاستبانة")) load(); });
+      document.querySelectorAll("[data-c]").forEach(b => b.onclick = async () => { if (confirm("بعد الإغلاق لا تقبل إجابات، وتظهر النتائج للمشاركين. متابعة؟") && await act(() => rpc("admin_set_survey_status", { p_id: b.dataset.c, p_status: "closed" }), "أُغلقت الاستبانة")) load(); });
+      document.querySelectorAll("[data-x]").forEach(b => b.onclick = async () => { if (confirm("حذف المسودة نهائياً؟") && await act(() => rpc("admin_delete_survey", { p_id: b.dataset.x }))) load(); }); },
     async roles() { const R = await rpc("admin_roles"), P = R.permissions;
       $("#pane").innerHTML = `<p class="hint">الأدوار الأساسية لا تُحذف. لا يمكنك منح صلاحية لا تملكها.</p>` + R.roles.map(r => `<div class="item"><div class="row2"><div><b>${esc(r.name_ar)}</b> <small class="hint" dir="ltr">${esc(r.code)}</small><div class="hint">النطاق: ${{ school: "المدرسة", linked: "المرتبطون", own: "بياناته فقط" }[r.data_scope]} · ${r.members} عضو</div></div>
         ${r.code !== "admin" ? `<button class="btn sm sec" data-e="${r.code}">تعديل الصلاحيات</button>` : '<span class="badge">كل الصلاحيات</span>'}</div><div style="margin-top:6px">${r.permissions.map(p => `<span class="badge info">${esc((P.find(x => x.code === p) || {}).name_ar || p)}</span>`).join(" ") || '<small class="hint">بلا صلاحيات إدارية</small>'}</div></div>`).join("");
@@ -67,6 +76,27 @@
       $("#pane").innerHTML = h;
       document.querySelectorAll("[data-k]").forEach(i => i.onchange = async () => { const v = i.type === "checkbox" ? i.checked : i.type === "text" ? i.value.trim() : Number(i.value); if (!(await act(() => rpc("admin_set_setting", { p_key: i.dataset.k, p_value: v })))) load(); }); },
   };
+  async function builder(id) {
+    const cur = id ? await rpc("admin_get_survey", { p_id: id }) : { title: "", description: "", required: true, closes_at: null, questions: [{ kind: "scale", prompt: "", required: true }] };
+    const Q = cur.questions.map(q => ({ ...q, options: q.options || [] }));
+    const o = modal(`<h3>${id ? "تعديل الاستبانة" : "استبانة جديدة"}</h3><label for="st">العنوان</label><input id="st" maxlength="160" value="${esc(cur.title)}"><label for="sd">وصف (اختياري)</label><textarea id="sd" maxlength="1000">${esc(cur.description || "")}</textarea>
+      <div class="fg"><div><label for="sc">آخر موعد (اختياري)</label><input id="sc" type="date" value="${cur.closes_at ? cur.closes_at.slice(0, 10) : ""}"></div><div><label class="lgchk" for="sr"><input id="sr" type="checkbox" ${cur.required ? "checked" : ""}><span>مطلوبة من المنسوبين</span></label></div></div>
+      <div id="qs"></div><div class="acts"><button class="btn sm sec" data-a="scale">+ سؤال مقياس (1-5)</button><button class="btn sm sec" data-a="choice">+ سؤال اختيار</button><button class="btn sm sec" data-a="text">+ سؤال نصي</button></div>
+      <p class="err" id="em"></p><div class="acts mt"><button class="btn" id="sv">حفظ كمسودة</button><button class="btn sec" id="cx">إلغاء</button></div>`);
+    const KIND = { scale: "مقياس 1-5", choice: "اختيار", text: "نصي" };
+    const draw = () => { o.querySelector("#qs").innerHTML = Q.map((q, i) => `<div class="qcard"><div class="row2"><b>${i + 1}. ${KIND[q.kind]}</b><button class="btn sm bad" data-d="${i}">حذف</button></div>
+      <input data-p="${i}" maxlength="300" placeholder="نص السؤال" value="${esc(q.prompt)}">${q.kind === "choice" ? `<textarea data-op="${i}" rows="3" placeholder="خيار في كل سطر (2 إلى 8)">${esc(q.options.join("\n"))}</textarea>` : ""}
+      <label class="lgchk"><input type="checkbox" data-r="${i}" ${q.required ? "checked" : ""}><span>إجابته مطلوبة</span></label></div>`).join("");
+      o.querySelectorAll("[data-d]").forEach(b => b.onclick = () => { sync(); Q.splice(+b.dataset.d, 1); draw(); }); };
+    const sync = () => { o.querySelectorAll("[data-p]").forEach(e => Q[+e.dataset.p].prompt = e.value); o.querySelectorAll("[data-op]").forEach(e => Q[+e.dataset.op].options = e.value.split("\n").map(x => x.trim()).filter(Boolean)); o.querySelectorAll("[data-r]").forEach(e => Q[+e.dataset.r].required = e.checked); };
+    draw();
+    o.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { sync(); Q.push({ kind: b.dataset.a, prompt: "", options: [], required: true }); draw(); });
+    o.querySelector("#cx").onclick = () => o.remove();
+    o.querySelector("#sv").onclick = async () => { sync(); const m = o.querySelector("#em"); m.textContent = "";
+      if (Q.some(q => q.prompt.trim().length < 3 || (q.kind === "choice" && (q.options.length < 2 || q.options.length > 8)))) { m.textContent = "أكمل نص كل سؤال، وللاختيار من 2 إلى 8 خيارات."; return; }
+      const d = o.querySelector("#sc").value;
+      if (await act(() => rpc("admin_save_survey", { p_id: id, p_title: o.querySelector("#st").value, p_description: o.querySelector("#sd").value, p_required: o.querySelector("#sr").checked, p_closes: d ? new Date(d + "T23:59:59").toISOString() : null, p_questions: Q.map(q => ({ kind: q.kind, prompt: q.prompt, options: q.kind === "choice" ? q.options : null, required: q.required })) }), "حُفظت")) { o.remove(); load(); } };
+  }
   async function rolesModal(a, done) { const R = await rpc("admin_roles"), cand = R.roles.filter(r => !r.user_type || r.user_type === a.user_type);
     const o = modal(`<h3>أدوار ${esc(a.display_name)}</h3>${cand.map(r => `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto" value="${r.code}" ${a.roles.includes(r.code) ? "checked" : ""}>${esc(r.name_ar)}</label>`).join("")}<div class="acts mt"><button class="btn" id="sv">حفظ</button><button class="btn sec" id="cx">إلغاء</button></div>`);
     o.querySelector("#cx").onclick = () => o.remove();

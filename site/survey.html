@@ -1,0 +1,26 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الاستبانة – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"></head>
+<body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script>
+<script>
+(async () => { if (!(await A.guard("survey.html"))) return; const { esc, rpc, $, fmt, msg, toast } = A;
+const id = new URLSearchParams(location.search).get("id");
+let s; try { s = await rpc("survey_get", { p_id: id }); } catch (x) { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div><p><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>`; return; }
+const q = (x, i) => `<div class="qcard" data-q="${x.id}" data-k="${x.kind}"><h4>${i + 1}. ${esc(x.prompt)} ${x.required ? '<span class="badge warn">مطلوب</span>' : ""}</h4>` +
+  (x.kind === "scale" ? `<div class="scale">${[1,2,3,4,5].map((n) => `<label><input type="radio" name="q${i}" value="${n}">${n}</label>`).join("")}</div><small class="hint">1 = غير موافق بشدة، 5 = موافق بشدة</small>`
+  : x.kind === "choice" ? `<div class="scale">${x.options.map((o, k) => `<label><input type="radio" name="q${i}" value="${k}">${esc(o)}</label>`).join("")}</div>`
+  : `<textarea name="q${i}" maxlength="1000" rows="3" placeholder="اكتب رأيك"></textarea>`) + "</div>";
+$("#app").innerHTML = `<h2>${esc(s.title)}</h2>${s.description ? `<p class="sub">${esc(s.description)}</p>` : ""}${s.status !== "open" ? '<div class="alert info">هذه معاينة: الاستبانة لم تُفتح بعد.</div>' : ""}
+<div class="alert info">إجاباتك تُجمَّع ولا تظهر باسمك. يُسجَّل فقط أنك شاركت. لا تُعرض النتائج إلا إذا بلغ المشاركون الحد الأدنى.</div>
+<form id="f" novalidate>${s.questions.map(q).join("")}<p class="err" id="m" role="alert"></p><button class="btn" id="go" ${s.status !== "open" ? "disabled" : ""}>إرسال الإجابات</button></form>`;
+$("#f").onsubmit = async (e) => { e.preventDefault(); const m = $("#m"); m.textContent = ""; const ans = {};
+  for (const [i, x] of s.questions.entries()) { const el = document.querySelector(`[data-q="${x.id}"]`); let v = null;
+    if (x.kind === "text") v = el.querySelector("textarea").value.trim(); else { const c = el.querySelector("input:checked"); v = c ? Number(c.value) : null; }
+    if ((v === null || v === "") && x.required) { m.textContent = `أجب عن السؤال ${i + 1}.`; el.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+    if (v !== null && v !== "") ans[x.id] = v; }
+  $("#go").disabled = true;
+  try { await rpc("survey_submit", { p_id: s.id, p_answers: ans }); toast("شكراً لمشاركتك"); setTimeout(() => location.replace("dashboard.html"), 900); }
+  catch (x) { $("#go").disabled = false; m.textContent = msg(x); } };
+})();
+</script></body></html>

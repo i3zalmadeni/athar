@@ -5,3 +5,4 @@ window.ATHAR = {
   schoolName: "متوسطة لبيد بن ربيعة",
   logoUrl: "" // ضع هنا مسار شعار المدرسة المعتمد (assets/school-logo.svg). فارغ = لا يُعرض شعار.
 };
+window.APP_CONFIG = { supabaseUrl: window.ATHAR.supabaseUrl, supabaseKey: window.ATHAR.supabaseKey };   // يستعملها شريط المستخدم الموحّد

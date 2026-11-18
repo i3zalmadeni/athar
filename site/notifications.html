@@ -2,12 +2,7 @@
 <title>الإشعارات – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"></head>
 <body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script>
 <script>
-(async () => { if (!(await A.guard("notifications.html"))) return; const { esc, rpc, $, fmt } = A;
-const L = await rpc("my_notifications", { p_limit: 60 });
-$("#app").innerHTML = `<div class="row2"><span></span><button class="btn sec sm" id="ma">تحديد الكل كمقروء</button></div><p class="sub">${L.length} إشعار</p>` +
- (L.length ? L.map(n => `<div class="item ${n.status === "sent" ? "unread" : ""}"><div class="row2"><b>${esc(n.title)}</b><small>${fmt(n.created_at)}</small></div>${n.body ? `<div>${esc(n.body)}</div>` : ""}${n.link && /^[a-z]+\.html(#[a-z]+)?$/.test(n.link) ? `<a href="${n.link}">فتح</a>` : ""}</div>`).join("") : '<div class="empty">لا توجد إشعارات.</div>');
-$("#ma").onclick = async () => { await rpc("mark_notifications_read"); location.reload(); };
-})();
+(async () => { if (!(await A.guard("notifications.html"))) return; ubPage(A.$("#app"), "أثر"); })();
 </script></body></html>

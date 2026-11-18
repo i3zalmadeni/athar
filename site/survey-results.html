@@ -1,0 +1,22 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نتائج الاستبانة – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"></head>
+<body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script>
+<script>
+(async () => { if (!(await A.guard("survey-results.html"))) return; const { esc, rpc, $, fmt, msg } = A;
+const id = new URLSearchParams(location.search).get("id");
+let r; try { r = await rpc("survey_results", { p_id: id }); } catch (x) { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div><p><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>`; return; }
+const s = r.survey, back = '<p class="mt"><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>';
+if (r.hidden) { $("#app").innerHTML = `<h2>${esc(s.title)}</h2><div class="alert info">لا تُعرض النتائج قبل أن يبلغ المشاركون ${r.min}، حماية لخصوصية المشاركين. المشاركون الآن: ${r.participants}.</div>${back}`; return; }
+const bar = (l, v, t) => `<div class="r"><span>${esc(l)}</span><span class="t"><i style="width:${Math.min(100, v)}%"></i></span><b>${t}</b></div>`;
+const item = (x, i) => `<div class="qcard"><h4>${i + 1}. ${esc(x.prompt)}</h4>` + (x.kind === "scale"
+  ? `<p class="hint">المتوسط <b>${x.mean ?? "—"}</b> من 5 · موافقون ${x.favorable_pct ?? 0}% · غير موافقين ${x.unfavorable_pct ?? 0}% · أجاب ${x.answered}</p><div class="bars">${x.dist.map((c, k) => bar(String(k + 1), x.answered ? (100 * c / x.answered) : 0, c)).join("")}</div>`
+  : x.kind === "choice" ? `<div class="bars">${x.options.map((o) => bar(o.label, o.pct, `${o.count} (${o.pct}%)`)).join("")}</div>`
+  : `<p class="hint">${x.answered} إجابة نصية. تُعرض نصوصها لمن له صلاحية إدارة الاستبانات فقط.</p>${(x.texts || []).map((t) => `<div class="item">${esc(t)}</div>`).join("")}`) + "</div>";
+const an = r.analysis, li = (a) => a.length ? `<ul>${a.map((x) => `<li>${esc(x.prompt)} <b>(${x.mean})</b></li>`).join("")}</ul>` : '<p class="hint">لا يوجد.</p>';
+$("#app").innerHTML = `<h2>${esc(s.title)}</h2>${s.description ? `<p class="sub">${esc(s.description)}</p>` : ""}
+<div class="grid"><div class="stat"><b>${r.participants}</b><span>مشاركاً</span></div><div class="stat"><b>${r.rate_pct ?? "—"}%</b><span>نسبة المشاركة من ${r.eligible} منسوباً</span></div><div class="stat"><b>${an.overall_mean ?? "—"}</b><span>المتوسط العام من 5</span></div></div>
+<h3 class="sec">تحليل الاستبانة</h3><div class="two"><div class="card"><b>نقاط القوة</b>${li(an.strengths)}</div><div class="card"><b>تحتاج متابعة</b>${li(an.focus)}</div></div><p class="hint">${esc(an.note)}</p>
+<h3 class="sec">النتائج التفصيلية</h3>${r.items.map(item).join("")}${back}`; })();
+</script></body></html>

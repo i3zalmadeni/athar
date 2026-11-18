@@ -1,14 +1,24 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>لوحة التحكم – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>مكتبي الإلكتروني – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"></head>
 <body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script>
 <script>
-(async () => { if (!(await A.guard("dashboard.html"))) return; const me = A.state.me, { esc, rpc, $, fmt } = A;
-const head = `<section class="hero"><h1>مرحباً، ${esc(me.display_name)}</h1><p>${me.roles.map(r => esc(r.name_ar)).join("، ")}</p></section>`;
-if (me.status !== "active") { $("#app").innerHTML = head + A.statusScreen(me); return; }
-let d = {}; try { d = await rpc("admin_dashboard"); } catch (_) {}
+(async () => { if (!(await A.guard("dashboard.html"))) return; const me = A.state.me, { esc, rpc, $, fmt, ico } = A;
+const codes = me.roles.map((r) => r.code);
+const role = codes.includes("admin") ? "مدير النواة الرقمية" : codes.includes("athar_coordinator") ? "منسق أثر" : codes.includes("school_manager") ? "مدير المدرسة" : codes.includes("student_affairs") ? "شؤون الطلاب" : "منسوب";
+if (window.PK) PK.welcome("#app", { mode: "before", sb: A.sb, name: me.display_name, role });
+if (me.status !== "active") { $("#app").innerHTML = A.statusScreen(me); return; }
+let S = { pending: [], participated: [] }, d = {};
+try { S = await rpc("surveys_me"); } catch (_) {} try { d = await rpc("admin_dashboard"); } catch (_) {}
+const due = (x) => x.closes_at ? `<small class="hint">آخر موعد ${fmt(x.closes_at)}</small>` : "";
+const pend = S.pending.length ? S.pending.map((x) => `<div class="sv ${x.required ? "req" : ""}"><div class="row2"><b>${esc(x.title)}</b>${x.required ? '<span class="badge warn">مطلوبة منك</span>' : '<span class="badge info">اختيارية</span>'}</div>
+  ${x.description ? `<p>${esc(x.description)}</p>` : ""}<div class="row2"><span class="hint">${x.questions} سؤالاً ${due(x)}</span><a class="btn sm" href="survey.html?id=${x.id}">تعبئة الاستبانة</a></div></div>`).join("")
+  : '<div class="empty">لا توجد استبانات تنتظرك الآن.</div>';
+const part = S.participated.length ? S.participated.map((x) => `<div class="sv"><div class="row2"><b>${esc(x.title)}</b>${x.results_ready ? '<span class="badge ok">النتائج جاهزة</span>' : '<span class="badge">بانتظار الإغلاق</span>'}</div>
+  <div class="row2"><span class="hint">شاركت ${fmt(x.submitted_at)}</span>${x.results_ready ? `<a class="btn sm sec" href="survey-results.html?id=${x.id}">النتائج والتحليل</a>` : ""}</div></div>`).join("")
+  : '<div class="empty">لم تشارك في دراسات بعد. تظهر هنا الاستبانات التي تعبّئها مع نتائجها وتحليلها بعد إغلاقها.</div>';
 const cards = [["pending_links","طلبات ربط أولياء الأمور","admin.html#links"],["pending_students","طلاب بانتظار التحقق","admin.html#students"],["active_intake_links","روابط تعبئة فعّالة","admin.html#intake"],["staff_accounts","حسابات المنسوبين الفعّالة","admin.html#accounts"]].filter(([k]) => d[k] != null);
-$("#app").innerHTML = head + (cards.length ? `<h3 class="sec">نظرة سريعة</h3><div class="grid">${cards.map(([k,t,h]) => `<a class="stat" href="${h}" style="text-decoration:none"><b>${d[k]}</b><span>${t}</span></a>`).join("")}</div>` : '<div class="card">لا توجد مهام إدارية مرتبطة بصلاحياتك.</div>')
- + `<h3 class="sec">ارتباطك بالنواة الرقمية</h3><div class="card">${me.staff_link ? `حسابك موحّد مع النواة الرقمية، وجرى التحقق منه ${fmt(me.staff_link.verified_at)}.` : "غير مرتبط"}</div>`; })();
+$("#app").innerHTML = `<div class="two"><section><h3 class="sec">استبانات تنتظرك</h3>${pend}</section><section><h3 class="sec">دراسات شاركت بها</h3>${part}</section></div>`
+ + (cards.length ? `<h3 class="sec">نظرة إدارية سريعة</h3><div class="grid">${cards.map(([k,t,h]) => `<a class="stat" href="${h}" style="text-decoration:none"><b>${d[k]}</b><span>${t}</span></a>`).join("")}</div>` : ""); })();
 </script></body></html>
