@@ -9,10 +9,10 @@ const me = A.state.me, ico = A.ico, app = A.$("#app"); app.className = "";
 const chip = (i, t) => `<span class="h3chip">${ico(i)}${t}</span>`;
 const row = (i, t, w, bg, bar) => `<div class="wrow"><div class="sq" style="background:${bg}">${hi(i)}</div><div class="wl"><small>${t}</small><div class="tr"><i style="width:${w}%;background:${bar}"></i></div></div></div>`;
 app.innerHTML = `<section class="hero3"><div class="h3g"><div class="h3t"><span class="h3pill">${ico("school")}أثر · النواة الرقمية</span>
-<h1><em>أثر</em> التعليم<br>كما يراه من يعيشه</h1><p class="h3sub">قياس أثر العملية التعليمية في متوسطة لبيد بن ربيعة</p>
-<p class="h3p">يسمع أثر المتعلم والمعلم وولي الأمر والقيادة المدرسية والجهة المشرفة بمقياس واحد قصير، ثم يحوّل أصواتهم إلى دراسة بنقاط قوة وفرص تحسين وتوصيات تُبنى عليها قرارات التطوير.</p>
-<div class="h3chips">${chip("users", "خمسة أصوات")}${chip("chart", "عشرة أسئلة كحد أقصى")}${chip("shield", "إجابات مجمّعة")}${chip("info", "دراسة وتوصيات")}</div>
-<div class="h3act"><a class="btn" href="${me ? "dashboard.html" : "login.html"}">${me ? "لوحة التحكم" : "دخول المنسوبين"}</a><a class="btn ghost" href="#ahb-what" id="goAbout">تعرّف على أثر</a></div></div>
+<h1><em>أثر</em> التعليم<br>يُقاس ولا يُفترض</h1><p class="h3sub">قياس أثر العملية التعليمية على المتعلم والمعلم وولي الأمر والقيادة المدرسية والجهة المشرفة</p>
+<p class="h3p">ليس السؤال كم نفّذنا، بل ماذا تغيّر في تعلّم المتعلم وممارسة المعلم وتجربة ولي الأمر وقرارات القيادة. هنا نفهم معنى قياس الأثر، وأهدافه، وكيف يغيّر المنظومة التعليمية نحو الأفضل.</p>
+<div class="h3chips">${chip("target", "ماذا تغيّر؟")}${chip("users", "لمن؟")}${chip("chart", "بأي دليل؟")}${chip("info", "وماذا بعد؟")}</div>
+<div class="h3act"><a class="btn" href="${me ? "dashboard.html" : "login.html"}">${me ? "لوحة التحكم" : "دخول المنسوبين"}</a><a class="btn ghost" href="#ahb-what" id="goAbout">ما قياس الأثر؟</a></div></div>
 <div class="illus" aria-hidden="true"><div class="win"><div class="dots"><i></i><i></i><i></i></div>
 ${row("school", "العملية التعليمية", 82, "#cfe9ee", "linear-gradient(90deg,#2f8f99,#5bbf8a)")}${row("building", "البيئة المدرسية", 64, "#fbe9c4", "linear-gradient(90deg,#f0b34a,#e29a2c)")}${row("star", "القيادة التعليمية", 46, "#d9efe2", "linear-gradient(90deg,#5bbf8a,#2a9d65)")}</div>
 <div class="fl a">${ico("users")}</div><div class="fl b">${ico("family")}</div><div class="fl c">${ico("chart")}</div></div></div></section><section class="sct" id="homeBody"></section>`;
