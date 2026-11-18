@@ -2,28 +2,49 @@
 <title>الدراسة – أثر</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/core.css"><link rel="stylesheet" href="assets/athar.css"></head>
 <body><div id="hdr"></div><main class="wrap" id="app"><div class="empty"><span class="spin"></span></div></main><div id="ftr"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/config.js"></script><script src="assets/ub.js"></script><script src="assets/unified-kit.js"></script><script src="assets/app.js"></script><script src="assets/charts.js"></script>
 <script>
 (async () => { if (!(await A.guard("study.html"))) return; const { esc, rpc, $, fmt, msg } = A;
 const AUD = { student: "المتعلم", teacher: "المعلم", administrative: "الهيئة الإدارية", supervisor: "الجهة المشرفة", parent: "ولي الأمر" };
-const id = new URLSearchParams(location.search).get("id");
-let r; try { r = await rpc("study_get", { p_id: id }); } catch (x) { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div><p><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>`; return; }
-const sn = r.snapshot, sv = sn.survey, bar = (l, v, t) => `<div class="r"><span>${esc(l)}</span><span class="t"><i style="width:${Math.min(100, v)}%"></i></span><b>${t}</b></div>`;
-const item = (x, i) => `<div class="qcard"><h4>${i + 1}. ${esc(x.prompt)}</h4>` + (x.kind === "scale"
-  ? `<p class="hint">المتوسط <b>${x.mean ?? "—"}</b> من 4 · موافقون ${x.favorable_pct ?? 0}% · غير موافقين ${x.unfavorable_pct ?? 0}% · أجاب ${x.answered}</p><div class="bars">${x.dist.map((c, k) => bar((x.options && x.options[k]) || String(k + 1), x.answered ? (100 * c / x.answered) : 0, c)).join("")}</div>`
-  : x.kind === "choice" ? `<div class="bars">${(x.options || []).map((o) => bar(o.label, o.pct, `${o.count} (${o.pct}%)`)).join("")}</div>`
-  : `<p class="hint">${x.answered} إجابة نصية، لا تُعرض في تقرير الدراسة حمايةً للخصوصية.</p>`) + "</div>";
-const list = (a, f) => a.length ? `<ul>${a.map(f).join("")}</ul>` : '<p class="hint">لا يوجد.</p>';
-$("#app").innerHTML = `<div class="row2"><h2>${esc(sv.title)}</h2><span class="badge ${r.status === "approved" ? "ok" : "warn"}">${r.status === "approved" ? "دراسة معتمدة" : "مسودة دراسة"}</span></div>
-<p class="sub">دراسة إلكترونية · ${AUD[sv.audience] || ""} · ${esc(A.C.schoolName)}${r.approved_at ? " · اعتُمدت " + fmt(r.approved_at) : ""}</p>
-<div class="grid"><div class="stat"><b>${sn.participants}</b><span>مشاركاً</span></div><div class="stat"><b>${sn.rate_pct != null ? sn.rate_pct + "%" : "—"}</b><span>نسبة المشاركة</span></div><div class="stat"><b>${sn.overall_mean ?? "—"}</b><span>المتوسط العام من 4</span></div><div class="stat"><b style="font-size:1rem">${esc(sn.level)}</b><span>المستوى العام</span></div></div>
-${r.note ? `<h3 class="sec">ملخص الدراسة</h3><div class="card"><p>${esc(r.note).replace(/\n/g, "<br>")}</p></div>` : ""}
-<h3 class="sec">النتائج حسب المحور</h3><div class="card">${sn.domains.map((d) => bar(d.name, d.mean * 25, d.mean + " من 4")).join("")}</div>
-<div class="two"><div><h3 class="sec">نقاط القوة</h3><div class="card">${list(sn.strengths, (x) => `<li>${esc(x.text || x.prompt)} <b>(${x.mean})</b><div class="hint">${esc(x.domain)}</div></li>`)}</div></div>
-<div><h3 class="sec">فرص التحسين</h3><div class="card">${list(sn.gaps, (x) => `<li>${esc(x.prompt)} <b>(${x.mean})</b><div class="hint">${esc(x.domain)}</div></li>`)}</div></div></div>
-<h3 class="sec">التوصيات</h3>${r.recommendations.map((x, i) => `<div class="item"><div class="row2"><b>${i + 1}. ${esc(x.text)}</b><span class="badge ${x.priority === "عالية" ? "bad" : x.priority === "متوسطة" ? "warn" : "info"}">${esc(x.priority)}</span></div><div class="hint">${esc(x.basis || "")}</div></div>`).join("")}
-<h3 class="sec">النتائج التفصيلية</h3>${sn.items.map(item).join("")}
-<p class="hint">التحليل وصفي قائم على قواعد ثابتة (قوة عند متوسط 3.3 فأعلى من 4، ومتابعة تحت 2.8)، وهو أداة مساندة لقرار الإدارة ولا يُعدّ تقويماً لأداء أحد.</p>
-<p class="mt acts"><button class="btn" id="pr">طباعة / حفظ PDF</button><a class="btn sec" href="${r.can_manage ? "studies-admin.html" : "dashboard.html"}">رجوع</a></p>`;
-$("#pr").onclick = () => window.print(); })();
+const id = new URLSearchParams(location.search).get("id"); let dom = "all", timer = null, texts = null, lastAt = null;
+const fail = (x) => { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div><p><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>`; };
+async function fetchStudy(refresh) {   // المدير يرى مسودة حية: نحدّثها من الإجابات الحالية قبل العرض
+  let r = await rpc("study_get", { p_id: id });
+  if (r.can_manage && r.status === "draft" && (refresh || !r.snapshot.items)) { try { await rpc("admin_generate_study", { p_survey: r.survey_id }); r = await rpc("study_get", { p_id: id }); } catch (_) {} }
+  if (r.can_manage && r.snapshot.items) { try { const t = await rpc("survey_results", { p_id: r.survey_id }); texts = t.texts_hidden ? { hidden: true, min: t.min } : Object.fromEntries(t.items.filter((x) => x.kind === "text").map((x) => [x.id, x.texts || []])); } catch (_) {} }
+  lastAt = new Date(); return r; }
+const item = (x, i, names) => { const d = names[x.domain] || ""; let h = `<div class="qx"><h4><span class="qn">${i + 1}</span><span>${esc(x.prompt)}<small class="hint" style="display:block">${esc(d)}</small></span>${x.kind === "scale" ? `<span class="m" style="background:${CH.tone(x.mean)}">${x.mean ?? "—"}</span>` : ""}</h4>`;
+  if (x.kind === "scale") h += CH.stack(x.dist.slice(0, 4), x.options, x.answered) + `<p class="hint">أجاب ${x.answered} · موافقون ${x.favorable_pct ?? 0}% · غير موافقين ${x.unfavorable_pct ?? 0}%</p>`;
+  else if (x.kind === "choice") h += CH.donut(x.options || []);
+  else { const t = texts && !texts.hidden ? texts[x.id] : null; h += `<p class="hint">${x.answered} إجابة نصية.${t ? "" : texts && texts.hidden ? ` تظهر نصوصها بعد أن يبلغ المشاركون ${texts.min} حمايةً للخصوصية.` : " لا تُعرض في التقرير حمايةً للخصوصية."}</p>${t && t.length ? `<div class="tx">${t.map((z) => `<div>${esc(z)}</div>`).join("")}</div>` : ""}`; }
+  return h + "</div>"; };
+const list = (a, f) => a.length ? `<ul>${a.map(f).join("")}</ul>` : '<p class="hint">لا يوجد بعد.</p>';
+function paint(r) { const sn = r.snapshot, mg = r.can_manage;
+  if (!sn.items) { $("#app").innerHTML = '<div class="empty"><span class="spin"></span></div>'; return; }
+  const sv = sn.survey, live = !!sn.live, names = Object.fromEntries(sn.domains.map((d) => [d.code, d.name])), scale = sn.items.filter((x) => x.kind === "scale"), n = sn.participants, tg = sn.target;
+  const shown = sn.items.filter((x) => dom === "all" || x.domain === dom), rank = [...scale].filter((x) => x.mean != null).sort((a, b) => b.mean - a.mean);
+  const fav = scale.reduce((a, x) => a + (x.dist ? x.dist[2] + x.dist[3] : 0), 0), allv = scale.reduce((a, x) => a + (x.answered || 0), 0);
+  $("#app").innerHTML = `<div class="row2"><h2>${esc(sv.title)}</h2><span class="badge ${r.status === "approved" ? "ok" : "warn"}">${r.status === "approved" ? "دراسة معتمدة" : live ? "مسودة دراسة · جارية" : "مسودة دراسة · مكتملة"}</span></div>
+  <p class="sub">دراسة إلكترونية · ${AUD[sv.audience] || ""} · ${esc(A.C.schoolName)}${r.approved_at ? " · اعتُمدت " + fmt(r.approved_at) : ""}</p>
+  ${mg && r.status === "draft" ? `<div class="livebar ${live ? "" : "off"}"><span class="dot"></span><b>${live ? "نتائج حية" : "اكتمل جمع الإجابات"}</b><span class="hint">${live ? "تتحدث الأرقام تلقائياً كل 20 ثانية" + (tg ? ` وتُغلق الاستبانة تلقائياً عند بلوغ ${tg} مشاركاً` : "") : "أُغلقت الاستبانة. راجع الدراسة ثم اعتمدها من إدارة الدراسات"}</span><span class="hint" style="margin-inline-start:auto">آخر تحديث ${lastAt.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span><button class="btn sm sec" id="rf">تحديث الآن</button></div>` : ""}
+  <div class="kp"><div>${CH.gauge(sn.overall_mean)}<b>${esc(sn.level)}</b><small>المتوسط العام</small></div><div>${CH.ring(n, tg || sn.eligible, tg || sn.eligible ? "من " + (tg || sn.eligible) : "مشاركاً")}<b>${n} مشاركاً</b><small>${tg ? "الهدف " + tg : sn.eligible ? "من " + sn.eligible + " مؤهلاً" : "بلا عدد مستهدف"}</small></div>
+    <div>${CH.ring(fav, allv, "إيجابية")}<b>${allv ? Math.round(100 * fav / allv) + "%" : "—"}</b><small>إجابات إيجابية (٣ و٤)</small></div></div>
+  ${r.note ? `<h3 class="sec">ملخص الدراسة</h3><div class="card"><p>${esc(r.note).replace(/\n/g, "<br>")}</p></div>` : ""}
+  <div class="two"><div><h3 class="sec">النتائج حسب المحور</h3><div class="card">${sn.domains.length ? CH.radar(sn.domains) + CH.bars(sn.domains.map((d) => [d.name, d.mean, d.mean + " من 4"]), 4) : '<p class="hint">لا بيانات بعد.</p>'}</div></div>
+  <div><h3 class="sec">ترتيب العبارات بالمتوسط</h3><div class="card" style="max-height:440px;overflow:auto">${rank.length ? CH.bars(rank.map((x) => [x.prompt, x.mean, String(x.mean)]), 4) : '<p class="hint">لا بيانات بعد.</p>'}</div></div></div>
+  <div class="two"><div><h3 class="sec">نقاط القوة</h3><div class="card">${list(sn.strengths, (x) => `<li>${esc(x.text || x.prompt)} <b>(${x.mean})</b><div class="hint">${esc(x.domain)}</div></li>`)}</div></div>
+  <div><h3 class="sec">فرص التحسين</h3><div class="card">${list(sn.gaps, (x) => `<li>${esc(x.prompt)} <b>(${x.mean})</b><div class="hint">${esc(x.domain)}</div></li>`)}</div></div></div>
+  <h3 class="sec">التوصيات</h3>${r.recommendations.map((x, i) => `<div class="item"><div class="row2"><b>${i + 1}. ${esc(x.text)}</b><span class="badge ${x.priority === "عالية" ? "bad" : x.priority === "متوسطة" ? "warn" : "info"}">${esc(x.priority)}</span></div><div class="hint">${esc(x.basis || "")}</div></div>`).join("")}
+  <h3 class="sec">النتائج التفصيلية</h3><div class="dtabs">${[["all", "كل العبارات"], ...sn.domains.map((d) => [d.code, d.name])].map(([k, t]) => `<button data-d="${k}" class="${dom === k ? "on" : ""}">${esc(t)}</button>`).join("")}</div>
+  ${shown.map((x, i) => item(x, sn.items.indexOf(x), names)).join("") || '<p class="hint">لا عبارات.</p>'}
+  <p class="hint">التحليل وصفي قائم على قواعد ثابتة (قوة عند متوسط 3.3 فأعلى من 4، ومتابعة تحت 2.8)، وهو أداة مساندة لقرار الإدارة ولا يُعدّ تقويماً لأداء أحد.</p>
+  <p class="mt acts"><button class="btn" id="pr">طباعة / حفظ PDF</button><a class="btn sec" href="${mg ? "studies-admin.html" : "dashboard.html"}">رجوع</a></p>`;
+  document.querySelectorAll("[data-d]").forEach((b) => b.onclick = () => { dom = b.dataset.d; paint(r); });
+  $("#pr").onclick = () => window.print(); const rf = $("#rf"); if (rf) rf.onclick = () => tick(true); }
+let cur = null;
+async function tick(now) { try { cur = await fetchStudy(true); paint(cur); } catch (x) { if (!cur) fail(x); } schedule(); }
+function schedule() { clearTimeout(timer); if (cur && cur.can_manage && cur.status === "draft" && cur.snapshot.live && !document.hidden) timer = setTimeout(tick, 20000); }
+document.addEventListener("visibilitychange", () => { if (!document.hidden && cur && cur.snapshot.live) tick(); });
+try { cur = await fetchStudy(false); paint(cur); schedule(); } catch (x) { fail(x); }
+})();
 </script></body></html>
