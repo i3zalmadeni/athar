@@ -28,7 +28,7 @@ const SV = (() => {
       <div class="svpg" aria-hidden="true"><i id="pg"></i></div><div class="svpl" id="pl" aria-live="polite">0 من ${n}</div>
       <form id="f" novalidate>${info.questions.map(q).join("")}
       ${o.contact ? `<section class="qc"><h4>بيانات اختيارية</h4><p class="hint">يمكنك تركها فارغة. إن أدخلتها فقد تتواصل المدرسة معك عند الحاجة.</p>
-        <div class="fg"><div><label for="nm">الاسم</label><input id="nm" maxlength="100" autocomplete="name"></div><div><label for="em">البريد الإلكتروني</label><input id="em" type="email" dir="ltr" maxlength="120" autocomplete="email" inputmode="email"></div>
+        <div class="stk"><div><label for="nm">الاسم</label><input id="nm" maxlength="100" autocomplete="name"></div><div><label for="em">البريد الإلكتروني</label><input id="em" type="email" dir="ltr" maxlength="120" autocomplete="email" inputmode="email"></div>
         <div><label for="ph">رقم الجوال</label><input id="ph" dir="ltr" inputmode="tel" maxlength="20" autocomplete="tel"></div></div></section>
         <div class="hp" aria-hidden="true"><label>الموقع<input id="web" tabindex="-1" autocomplete="off"></label></div>` : ""}
       <div class="svc"><p>${m.bye}</p></div>

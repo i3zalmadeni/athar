@@ -87,15 +87,15 @@ const dir = () => location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
 
   async function builder(id, aud) {
     const cur = id ? await rpc("admin_get_survey", { p_id: id }) : { title: "", description: "", audience: aud || "teacher", required: true, closes_at: null, target_count: null, questions: [{ kind: "scale", domain: "process", prompt: "", options: PH.agree[1], required: true }] };
-    const Q = cur.questions.filter((q) => q.kind === "scale").map((q) => ({ ...q, options: q.options && q.options.length === 4 ? q.options : PH.agree[1] }));
+    const Q = cur.questions.filter((q) => q.kind !== "text").map((q) => q.kind === "choice" ? { ...q, options: q.options || ["", ""] } : { ...q, options: q.options && q.options.length === 4 ? q.options : PH.agree[1] });
     const o = modal(`<h3>${id ? "تعديل الاستبانة" : "استبانة جديدة"}</h3><label for="sa">الفئة المستهدفة</label><select id="sa">${Object.keys(AUD).map((k) => `<option value="${k}" ${cur.audience === k ? "selected" : ""}>${AUD[k]}</option>`).join("")}</select>
       <label for="st">العنوان</label><input id="st" maxlength="160" value="${esc(cur.title)}"><label for="sd">وصف (اختياري)</label><textarea id="sd" maxlength="1000">${esc(cur.description || "")}</textarea>
       <div class="fg"><div><label for="sc">آخر موعد (اختياري)</label><input id="sc" type="date" value="${cur.closes_at ? cur.closes_at.slice(0, 10) : ""}"></div><div><label for="sg">العدد المستهدف (للروابط العامة)</label><input id="sg" type="number" min="1" value="${cur.target_count || ""}"></div><div><label class="lgchk" for="sr"><input id="sr" type="checkbox" ${cur.required ? "checked" : ""}><span>مطلوبة من المنسوبين</span></label></div></div>
       <p class="hint">كل سؤال بأربع عبارات مرتبة من الأضعف (1) إلى الأقوى (4). اختر قالب العبارات المناسب للسؤال أو اكتبها بنفسك. نص التوصية يظهر في الدراسة إذا ضعفت نتيجة السؤال.</p>
-      <div id="qs"></div><div class="acts"><button class="btn sm sec" id="aq">+ سؤال</button></div>
+      <div id="qs"></div><div class="acts"><button class="btn sm sec" id="aq">+ سؤال بأربع عبارات</button><button class="btn sm sec" id="ac">+ سؤال اختيار من متعدد (معلومة عامة، مثل الصف)</button></div>
       <p class="err" id="em"></p><div class="acts mt"><button class="btn" id="sv">حفظ كمسودة</button><button class="btn sec" id="cx">إلغاء</button></div>`);
     const setKey = (op) => Object.keys(PH).find((k) => PH[k][1].join("|") === op.join("|")) || "custom";
-    const draw = () => { o.querySelector("#qs").innerHTML = Q.map((q, i) => `<div class="qcard"><div class="row2"><b>السؤال ${i + 1}</b><button class="btn sm bad" data-d="${i}">حذف</button></div>
+    const draw = () => { o.querySelector("#qs").innerHTML = Q.map((q, i) => q.kind === "choice" ? `<div class="qcard"><div class="row2"><b>السؤال ${i + 1} · اختيار من متعدد</b><button class="btn sm bad" data-d="${i}">حذف</button></div><input data-p="${i}" maxlength="300" placeholder="نص السؤال، مثل: في أي صف يدرس ابنك؟" value="${esc(q.prompt)}"><label class="hint">الخيارات، كل خيار في سطر (من 2 إلى 8). لا تدخل في المتوسط العام، وتُعرض نتائجها بحلقة.</label><textarea data-co="${i}" rows="4">${esc(q.options.join("\n"))}</textarea><label class="lgchk"><input type="checkbox" data-r="${i}" ${q.required ? "checked" : ""}><span>إجابته مطلوبة</span></label></div>` : `<div class="qcard"><div class="row2"><b>السؤال ${i + 1}</b><button class="btn sm bad" data-d="${i}">حذف</button></div>
       <input data-p="${i}" maxlength="300" placeholder="نص السؤال" value="${esc(q.prompt)}"><select data-dm="${i}">${Object.keys(DOM).map((k) => `<option value="${k}" ${q.domain === k ? "selected" : ""}>${DOM[k]}</option>`).join("")}</select>
       <select data-ph="${i}">${Object.keys(PH).map((k) => `<option value="${k}" ${setKey(q.options) === k ? "selected" : ""}>قالب: ${PH[k][0]}</option>`).join("")}<option value="custom" ${setKey(q.options) === "custom" ? "selected" : ""}>عبارات مخصصة</option></select>
       <div class="fg">${q.options.map((t, k) => `<div><small class="hint">${k + 1}</small><input data-op="${i}:${k}" maxlength="60" value="${esc(t)}"></div>`).join("")}</div>
@@ -105,15 +105,16 @@ const dir = () => location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
       o.querySelectorAll("[data-ph]").forEach((s) => s.onchange = () => { sync(); if (PH[s.value]) Q[+s.dataset.ph].options = [...PH[s.value][1]]; draw(); }); };
     const sync = () => { o.querySelectorAll("[data-p]").forEach((e) => Q[+e.dataset.p].prompt = e.value); o.querySelectorAll("[data-dm]").forEach((e) => Q[+e.dataset.dm].domain = e.value);
       o.querySelectorAll("[data-rc]").forEach((e) => Q[+e.dataset.rc].recommendation = e.value); o.querySelectorAll("[data-sg]").forEach((e) => Q[+e.dataset.sg].strength = e.value);
-      o.querySelectorAll("[data-op]").forEach((e) => { const [i, k] = e.dataset.op.split(":"); Q[+i].options[+k] = e.value; }); o.querySelectorAll("[data-r]").forEach((e) => Q[+e.dataset.r].required = e.checked); };
+      o.querySelectorAll("[data-op]").forEach((e) => { const [i, k] = e.dataset.op.split(":"); Q[+i].options[+k] = e.value; }); o.querySelectorAll("[data-co]").forEach((e) => { Q[+e.dataset.co].options = e.value.split("\n").map((t) => t.trim()).filter(Boolean); }); o.querySelectorAll("[data-r]").forEach((e) => Q[+e.dataset.r].required = e.checked); };
     draw();
+    o.querySelector("#ac").onclick = () => { sync(); if (Q.length >= 10) { o.querySelector("#em").textContent = "الحد الأقصى 10 أسئلة."; return; } Q.push({ kind: "choice", domain: null, prompt: "", options: ["", ""], required: true }); draw(); };
     o.querySelector("#aq").onclick = () => { sync(); if (Q.length >= 10) { o.querySelector("#em").textContent = "الحد الأقصى 10 أسئلة."; return; } Q.push({ kind: "scale", domain: "process", prompt: "", options: [...PH.agree[1]], required: true }); draw(); };
     o.querySelector("#cx").onclick = () => o.remove();
     o.querySelector("#sv").onclick = async () => { sync(); const m = o.querySelector("#em"); m.textContent = "";
-      if (!Q.length || Q.some((q) => q.prompt.trim().length < 3 || q.options.some((t) => !t.trim()))) { m.textContent = "أضف سؤالاً على الأقل، وأكمل نص كل سؤال وعباراته الأربع."; return; }
+      if (!Q.length || Q.some((q) => q.prompt.trim().length < 3 || q.options.some((t) => !t.trim()) || (q.kind === "choice" && (q.options.length < 2 || q.options.length > 8)))) { m.textContent = "أضف سؤالاً على الأقل، وأكمل نص كل سؤال وعباراته (الاختيار من متعدد من 2 إلى 8 خيارات)."; return; }
       const d = o.querySelector("#sc").value, g = o.querySelector("#sg").value;
       if (await act(() => rpc("admin_save_survey", { p_id: id, p_title: o.querySelector("#st").value, p_description: o.querySelector("#sd").value, p_audience: o.querySelector("#sa").value, p_required: o.querySelector("#sr").checked, p_closes: d ? new Date(d + "T23:59:59").toISOString() : null, p_target: g ? Number(g) : null,
-        p_questions: Q.map((q) => ({ kind: "scale", domain: q.domain, prompt: q.prompt, options: q.options.map((t) => t.trim()), required: q.required, recommendation: q.recommendation || null, strength: q.strength || null })) }), "حُفظت")) { o.remove(); load(); } };
+        p_questions: Q.map((q) => ({ kind: q.kind || "scale", domain: q.kind === "choice" ? null : q.domain, prompt: q.prompt, options: q.options.map((t) => t.trim()), required: q.required, recommendation: q.recommendation || null, strength: q.strength || null })) }), "حُفظت")) { o.remove(); load(); } };
   }
   load();
 })();

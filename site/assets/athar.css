@@ -187,3 +187,5 @@ header .top .corelnk{order:2;flex:none}
 .qx .tx{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;display:grid;gap:6px}.qx .tx div{background:#f6fafb;border-radius:10px;padding:8px 10px}
 @media (max-width:560px){.ch-br{grid-template-columns:1fr 60px}.ch-bl{grid-column:1/-1}.ch-bt{grid-column:1}}
 @media (prefers-reduced-motion:reduce){.ch-poly,.ch-br,.qx,.kp>div{animation:none}}
+
+.stk{display:grid;grid-template-columns:1fr;gap:12px}.stk label{margin:0 0 4px;font-weight:600}
