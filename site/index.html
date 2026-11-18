@@ -8,9 +8,9 @@
 const me = A.state.me, ico = A.ico, app = A.$("#app"); app.className = "";
 const chip = (i, t) => `<span class="h3chip">${ico(i)}${t}</span>`;
 app.innerHTML = `<section class="hero3"><div class="h3g"><div class="h3t"><span class="h3pill">${ico("school")}أثر · النواة الرقمية</span>
-<h1><em>أثر</em></h1><p class="h3sub">تسجيل الطلاب وأولياء الأمور بروابط مباشرة</p>
-<p class="h3p">منظومة لمتوسطة لبيد بن ربيعة تجمع بيانات الطلاب وأولياء أمورهم عبر روابط تعبئة تصدرها المدرسة، وتتحقق منها الإدارة. يدخل المنسوبون بحساب النواة نفسه، ولا يحتاج الطالب أو ولي الأمر إلى حساب.</p>
-<div class="h3chips">${chip("key", "دخول موحد")}${chip("lock", "بلا حسابات للطلاب")}${chip("shield", "تحقق من الإدارة")}${chip("info", "سجل تدقيق")}</div>
+<h1><em>أثر</em></h1><p class="h3sub">قياس الأثر وإدارة الاستبانات</p>
+<p class="h3p">منظومة لمتوسطة لبيد بن ربيعة تجمع آراء المتعلمين والمعلمين والهيئة الإدارية والجهة المشرفة وأولياء الأمور في استبانات قصيرة عن العملية التربوية والبيئة المدرسية والقيادة التعليمية، ثم تحوّلها إلى دراسة وتقرير وتوصيات.</p>
+<div class="h3chips">${chip("key", "دخول موحد للمنسوبين")}${chip("lock", "بلا دخول لأولياء الأمور والطلاب")}${chip("shield", "إجابات مجمّعة")}${chip("info", "دراسة وتوصيات")}</div>
 <div class="h3act"><a class="btn" href="${me ? "dashboard.html" : "login.html"}">${me ? "لوحة التحكم" : "دخول المنسوبين"}</a><a class="btn ghost" href="about.html">عن أثر</a></div></div>
 <div class="illus" aria-hidden="true"><div class="win"><div class="dots"><i></i><i></i><i></i></div>
 <div class="wrow"><div class="sq" style="background:#cfe9ee"></div><div class="tr"><i style="width:82%;background:linear-gradient(90deg,#2f8f99,#5bbf8a)"></i></div></div>
@@ -18,13 +18,13 @@ app.innerHTML = `<section class="hero3"><div class="h3g"><div class="h3t"><span 
 <div class="wrow"><div class="sq" style="background:#d9efe2"></div><div class="tr"><i style="width:46%;background:linear-gradient(90deg,#5bbf8a,#2a9d65)"></i></div></div></div>
 <div class="fl a">${ico("users")}</div><div class="fl b">${ico("school")}</div><div class="fl c">${ico("key")}</div></div></div></section>
 <section class="sct"><h2>كيف يعمل أثر</h2><div class="steps">
-<div class="card"><b>تصدر المدرسة رابطاً</b>ينشئ المختص رابط تعبئة للطلاب أو لأولياء الأمور، بتاريخ انتهاء وحد استخدام، ويوقفه متى شاء.</div>
-<div class="card"><b>تعبئة مباشرة</b>يفتح الطالب أو ولي الأمر الرابط ويعبّئ النموذج ويرسله، بلا تسجيل دخول وبلا حساب.</div>
-<div class="card"><b>مراجعة واعتماد</b>تراجع الإدارة ما يصل وتتحقق من بيانات الطالب ومن صلة ولي الأمر، ويبقى كل إجراء في سجل العمليات.</div></div></section>
-<section class="sct"><h2>لمن أثر</h2><div class="grid">
-<div class="card"><span class="ic">${ico("school")}</span><b>المنسوبون</b><p>دخول بحساب النواة الرقمية، وصلاحيات تحددها أدوارهم.</p></div>
-<div class="card"><span class="ic">${ico("users")}</span><b>الطلاب</b><p>نموذج تسجيل يصلهم برابط من المدرسة.</p></div>
-<div class="card"><span class="ic">${ico("user")}</span><b>أولياء الأمور</b><p>نموذج يربطهم بابنهم، ولا تظهر بيانات الابن لأحد قبل تحقق المدرسة.</p></div>
-<div class="card"><span class="ic">${ico("shield")}</span><b>الإدارة</b><p>مدير النواة ومنسق أثر يملكان الصلاحية الكاملة بما فيها الروابط.</p></div></div></section>`;
+<div class="card"><b>استبانة لكل فئة</b>خمس فئات: المتعلم والمعلم والهيئة الإدارية والجهة المشرفة وولي الأمر، بما لا يزيد على عشرة أسئلة في كل استبانة.</div>
+<div class="card"><b>تعبئة سهلة</b>يعبّئ المنسوبون من مكتبهم الإلكتروني بحساب النواة، ويعبّئ المتعلم وولي الأمر والجهة المشرفة برابط مباشر بلا دخول.</div>
+<div class="card"><b>دراسة وتوصيات</b>بعد الإغلاق تُنشأ دراسة إلكترونية بنقاط القوة وفرص التحسين وتوصيات، تعتمدها الإدارة وتظهر للمشاركين من المنسوبين.</div></div></section>
+<section class="sct"><h2>الفئات المستهدفة</h2><div class="grid">
+<div class="card"><span class="ic">${ico("users")}</span><b>المتعلم وولي الأمر</b><p>رابط مباشر بلا حساب، والاسم والبريد والجوال اختيارية.</p></div>
+<div class="card"><span class="ic">${ico("school")}</span><b>المعلم والهيئة الإدارية</b><p>دخول بحساب النواة، وتظهر لكل فئة استباناتها ودراساتها.</p></div>
+<div class="card"><span class="ic">${ico("user")}</span><b>الجهة المشرفة</b><p>رابط مباشر بلا دخول لتقويم واقع المدرسة.</p></div>
+<div class="card"><span class="ic">${ico("shield")}</span><b>الإدارة</b><p>مدير النواة ومنسق أثر يملكان الصلاحية الكاملة لإدارة الاستبانات والدراسات.</p></div></div></section>`;
 })();
 </script></body></html>

@@ -14,9 +14,9 @@ const item = (x, i) => `<div class="qcard"><h4>${i + 1}. ${esc(x.prompt)}</h4>` 
   ? `<p class="hint">المتوسط <b>${x.mean ?? "—"}</b> من 5 · موافقون ${x.favorable_pct ?? 0}% · غير موافقين ${x.unfavorable_pct ?? 0}% · أجاب ${x.answered}</p><div class="bars">${x.dist.map((c, k) => bar(String(k + 1), x.answered ? (100 * c / x.answered) : 0, c)).join("")}</div>`
   : x.kind === "choice" ? `<div class="bars">${x.options.map((o) => bar(o.label, o.pct, `${o.count} (${o.pct}%)`)).join("")}</div>`
   : `<p class="hint">${x.answered} إجابة نصية. تُعرض نصوصها لمن له صلاحية إدارة الاستبانات فقط.</p>${(x.texts || []).map((t) => `<div class="item">${esc(t)}</div>`).join("")}`) + "</div>";
-const an = r.analysis, li = (a) => a.length ? `<ul>${a.map((x) => `<li>${esc(x.prompt)} <b>(${x.mean})</b></li>`).join("")}</ul>` : '<p class="hint">لا يوجد.</p>';
+const meanOf = r.items.filter((x) => x.kind === "scale" && x.mean != null).map((x) => Number(x.mean)), overall = meanOf.length ? (meanOf.reduce((a, b) => a + b, 0) / meanOf.length).toFixed(2) : "—";
 $("#app").innerHTML = `<h2>${esc(s.title)}</h2>${s.description ? `<p class="sub">${esc(s.description)}</p>` : ""}
-<div class="grid"><div class="stat"><b>${r.participants}</b><span>مشاركاً</span></div><div class="stat"><b>${r.rate_pct ?? "—"}%</b><span>نسبة المشاركة من ${r.eligible} منسوباً</span></div><div class="stat"><b>${an.overall_mean ?? "—"}</b><span>المتوسط العام من 5</span></div></div>
-<h3 class="sec">تحليل الاستبانة</h3><div class="two"><div class="card"><b>نقاط القوة</b>${li(an.strengths)}</div><div class="card"><b>تحتاج متابعة</b>${li(an.focus)}</div></div><p class="hint">${esc(an.note)}</p>
+<div class="grid"><div class="stat"><b>${r.participants}</b><span>مشاركاً</span></div><div class="stat"><b>${r.rate_pct != null ? r.rate_pct + "%" : "—"}</b><span>${r.eligible ? "نسبة المشاركة من " + r.eligible : "نسبة المشاركة (حدد العدد المستهدف)"}</span></div><div class="stat"><b>${overall}</b><span>المتوسط العام من 5</span></div></div>
+<p class="mt"><a class="btn sec" href="admin.html#studies">الدراسات والتقارير</a></p>
 <h3 class="sec">النتائج التفصيلية</h3>${r.items.map(item).join("")}${back}`; })();
 </script></body></html>

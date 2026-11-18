@@ -7,30 +7,32 @@
 (async () => {
   const { $, esc, sb, msg } = A; await A.chrome("form.html");
   const tok = new URLSearchParams(location.search).get("t") || "";
-  const card = (h) => { $("#app").innerHTML = `<div class="auth"><div class="card">${h}</div></div>`; };
-  let info = null; try { info = (await sb.rpc("athar_public_intake_info", { p_token: tok })).data; } catch (_) {}
-  if (!info || !info.valid) { card('<h2>الرابط غير صالح</h2><div class="alert bad">هذا الرابط غير صالح أو منتهٍ أو أُوقف. اطلب رابطاً جديداً من المدرسة.</div>'); return; }
-  const kind = info.kind, isS = kind === "student";
-  const REL = '<option value="father">أب</option><option value="mother">أم</option><option value="guardian">وصي</option><option value="brother">أخ</option><option value="other">أخرى</option>';
-  card(`<h2>${isS ? "تسجيل بيانات الطالب" : "تسجيل ولي الأمر"}</h2><p class="sub">${esc(A.C.schoolName)}${info.label ? " · " + esc(info.label) : ""}</p>
-  <form id="f" novalidate><div class="fg"><div class="full"><label for="fn">الاسم الكامل</label><input id="fn" required minlength="6" maxlength="100"></div>
-  ${isS ? `<div><label for="sno">رقم الطالب</label><input id="sno" dir="ltr" required></div>
-  <div><label for="gr">الصف</label><select id="gr" required><option value="">اختر</option><option>الأول المتوسط</option><option>الثاني المتوسط</option><option>الثالث المتوسط</option></select></div>
-  <div><label for="sec">الفصل (اختياري)</label><input id="sec" maxlength="20"></div><div><label for="bd">تاريخ الميلاد (اختياري)</label><input id="bd" type="date"></div>`
-  : `<div><label for="ph">رقم الجوال</label><input id="ph" dir="ltr" inputmode="tel" required></div><div><label for="sno">رقم الطالب (ابنك)</label><input id="sno" dir="ltr" required></div>
-  <div><label for="rel">صلة القرابة</label><select id="rel">${REL}</select></div>`}</div>
+  const card = (h) => { $("#app").innerHTML = `<div class="auth wide"><div class="card">${h}</div></div>`; };
+  let info = null; try { info = (await sb.rpc("athar_public_survey_info", { p_token: tok })).data; } catch (_) {}
+  if (!info || !info.valid) { card('<h2>الاستبانة غير متاحة</h2><div class="alert bad">الرابط غير صالح أو أن الاستبانة أُغلقت. اطلب رابطاً جديداً من المدرسة.</div>'); return; }
+  const AUD = { student: "المتعلم", parent: "ولي الأمر", supervisor: "الجهة المشرفة" };
+  const q = (x, i) => `<div class="qcard" data-q="${x.id}" data-k="${x.kind}"><h4>${i + 1}. ${esc(x.prompt)} ${x.required ? '<span class="badge warn">مطلوب</span>' : ""}</h4>` +
+    (x.kind === "scale" ? `<div class="scale">${[1,2,3,4,5].map((n) => `<label><input type="radio" name="q${i}" value="${n}">${n}</label>`).join("")}</div><small class="hint">1 = غير موافق بشدة، 5 = موافق بشدة</small>`
+    : x.kind === "choice" ? `<div class="scale">${x.options.map((o, k) => `<label><input type="radio" name="q${i}" value="${k}">${esc(o)}</label>`).join("")}</div>`
+    : `<textarea name="q${i}" maxlength="1000" rows="3" placeholder="اكتب رأيك"></textarea>`) + "</div>";
+  card(`<h2>${esc(info.title)}</h2><p class="sub">${esc(A.C.schoolName)} · ${AUD[info.audience] || ""}</p>${info.description ? `<p>${esc(info.description)}</p>` : ""}
+  <div class="alert info">لا حاجة لتسجيل الدخول. إجاباتك تُجمَّع في دراسة تحليلية لتحسين التعليم والبيئة المدرسية.</div>
+  <form id="f" novalidate>${info.questions.map(q).join("")}
+  <h3 class="sec">بيانات اختيارية</h3><p class="hint">يمكنك تركها فارغة. إن أدخلتها فقد تتواصل المدرسة معك عند الحاجة.</p>
+  <div class="fg"><div><label for="nm">الاسم</label><input id="nm" maxlength="100" autocomplete="name"></div><div><label for="em">البريد الإلكتروني</label><input id="em" type="email" dir="ltr" maxlength="120" autocomplete="email"></div>
+  <div><label for="ph">رقم الجوال</label><input id="ph" dir="ltr" inputmode="tel" maxlength="20" autocomplete="tel"></div></div>
   <div class="hp" aria-hidden="true"><label>الموقع<input id="web" tabindex="-1" autocomplete="off"></label></div>
-  ${isS ? "" : '<p class="hint">لا تظهر بيانات الطالب لأحد قبل أن تتحقق المدرسة من العلاقة.</p>'}
-  <p class="err" id="m" role="alert"></p><button class="btn block" id="go">إرسال</button></form>`);
-  $("#f").onsubmit = async (e) => { e.preventDefault(); const m = $("#m"), b = $("#go"); m.textContent = "";
-    const v = (i) => ($("#" + i)?.value || "").trim();
-    const p = { full_name: v("fn"), student_no: v("sno"), website: v("web") };
-    if (isS) { p.grade = v("gr"); if (v("sec")) p.section = v("sec"); if (v("bd")) p.birth_date = v("bd"); } else { p.phone = v("ph"); p.relation = v("rel"); }
-    if (p.full_name.length < 6 || !p.student_no || (isS ? !p.grade : !p.phone)) { m.textContent = "أكمل الحقول المطلوبة."; return; }
+  <p class="err" id="m" role="alert"></p><button class="btn block" id="go">إرسال الإجابات</button></form>`);
+  $("#f").onsubmit = async (e) => { e.preventDefault(); const m = $("#m"), b = $("#go"); m.textContent = ""; const ans = {};
+    for (const [i, x] of info.questions.entries()) { const el = document.querySelector(`[data-q="${x.id}"]`); let v = null;
+      if (x.kind === "text") v = el.querySelector("textarea").value.trim(); else { const c = el.querySelector("input:checked"); v = c ? Number(c.value) : null; }
+      if ((v === null || v === "") && x.required) { m.textContent = `أجب عن السؤال ${i + 1}.`; el.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+      if (v !== null && v !== "") ans[x.id] = v; }
+    const v = (i) => ($("#" + i).value || "").trim();
     b.disabled = true;
-    const { data, error } = await sb.rpc("athar_public_submit", { p_token: tok, p_payload: p });
+    const { data, error } = await sb.rpc("athar_public_survey_submit", { p_token: tok, p_payload: { answers: ans, name: v("nm"), email: v("em"), phone: v("ph"), website: v("web") } });
     if (error || !data || !data.ok) { b.disabled = false; m.textContent = msg(error || { message: data && data.error }); return; }
-    card(`<h2>تم استلام ${isS ? "بياناتك" : "طلبك"}</h2><div class="alert ok">${isS ? "ستراجع المدرسة بياناتك وتتحقق منها." : "ستتحقق المدرسة من صلتك بالطالب."} لا حاجة لإنشاء حساب أو الدخول.</div>`); };
+    card('<h2>شكراً لمشاركتك</h2><div class="alert ok">استُلمت إجاباتك. رأيك يساهم في تحسين المدرسة.</div>'); };
 })();
 </script>
 </body></html>

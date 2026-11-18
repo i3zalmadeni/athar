@@ -14,7 +14,7 @@
   <label for="p">كلمة المرور</label><input id="p" type="password" required autocomplete="current-password">
   <label class="lgchk" for="rm"><input id="rm" type="checkbox"><span>حفظ معلوماتي<small class="hint">يحفظ معرّف الدخول على هذا الجهاز فقط، ولا تُحفظ كلمة المرور.</small></span></label>
   <p class="err" id="m" role="alert"></p><button class="btn block" id="go">دخول</button></form>
-  <p class="hint mt">حساب واحد لكل أنظمة النواة الرقمية. الطلاب وأولياء الأمور لا يحتاجون حساباً، يصلهم رابط التعبئة من المدرسة.</p></div></div>`;
+  <p class="hint mt">حساب واحد لكل أنظمة النواة الرقمية. المتعلم وولي الأمر والجهة المشرفة لا يحتاجون حساباً، يصلهم رابط الاستبانة من المدرسة.</p></div></div>`;
   try { const v = localStorage.getItem(RK); if (v) { $("#e").value = v; $("#rm").checked = true; $("#p").focus(); } } catch (_) {}
   const fail = async (t) => { $("#m").textContent = t; $("#go").disabled = false; };
   // جلسة قائمة من النواة: نحاول الدخول مباشرة
