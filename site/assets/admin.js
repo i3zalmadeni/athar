@@ -9,7 +9,7 @@
   const ROLE_AR = {}; me.roles.forEach(r => ROLE_AR[r.code] = r.name_ar);
   let cur = TABS.find(t => "#" + t[0] === location.hash) ? location.hash.slice(1) : TABS[0][0];
   const act = async (fn, ok) => { try { await fn(); toast(ok || "تم"); return true; } catch (x) { toast(msg(x), true); return false; } };
-  const modal = (html) => { const o = document.createElement("div"); o.className = "ov"; o.innerHTML = `<div class="md">${html}</div>`; o.onclick = (e) => { if (e.target === o) o.remove(); }; document.body.appendChild(o); return o; };
+  const modal = (html) => { const o = document.createElement("div"); o.className = "ov"; o.innerHTML = `<div class="md">${html}</div>`; o.onclick = (e) => { if (e.target === o) o.remove(); }; modalX(o.firstChild, () => o.remove()); document.body.appendChild(o); return o; };
   const ask = (t) => prompt(t) ;
 
   function shell() {

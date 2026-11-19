@@ -44,13 +44,18 @@ const ubSysHTML = () => { const cur = location.pathname.split("/").filter(Boolea
   return UB_SYS.map(([p, n, i, d]) => { const on = p.split("/")[0] === cur;
     return `<a class="ub-sys${on ? " on" : ""}" href="/${p}"${on ? ' aria-current="page"' : ""}><span class="ub-ic">${ubIco(i)}</span><span class="ub-tx"><b>${ubEsc(n)}</b><small>${on ? "أنت هنا" : ubEsc(d)}</small></span></a>`; }).join(""); };
 // HTML الشريط. home: رابط صفحة المستخدم (ملفه أو حسابه) عند النقر على صورته واسمه
-function ubBarHTML(name, home) {
+const UB_PROF = "/teachers-community/#/home/profile";
+const UB_PW = "/digital-core/password.html";
+function ubBarHTML(name, home, pwUrl, profUrl) {
   return `<div class="ub"><div class="ub-n"><button type="button" class="ub-bell ub-swb" id="ubS" aria-label="التنقل بين لوحات تحكم الأنظمة" title="أنظمة النواة الرقمية" aria-expanded="false" aria-haspopup="true" aria-controls="ubSP">${ubIco("apps")}</button>
     <div class="ub-p ub-sp" id="ubSP" role="dialog" aria-label="أنظمة النواة الرقمية" hidden><div class="ub-ph"><b>انتقل إلى لوحة تحكم نظام آخر</b></div><div class="ub-sg">${ubSysHTML()}</div></div></div>
     <a class="ub-bell ub-lb${location.pathname.indexOf("lbeed.html") > -1 ? " on" : ""}" id="ubLb" href="/digital-core/lbeed.html" data-tip="يحدث في لبيد" aria-label="يحدث في لبيد" title="يحدث في لبيد"${location.pathname.indexOf("lbeed.html") > -1 ? ' aria-current="page"' : ""}><svg class="ub-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg><span class="ub-lbd" aria-hidden="true"></span></a>
     <div class="ub-n"><button type="button" class="ub-bell" id="ubB" aria-label="الإشعارات" aria-expanded="false" aria-haspopup="true" aria-controls="ubP">${ubIco("bell")}<span class="ub-c" id="ubC" hidden></span></button>
     <div class="ub-p" id="ubP" role="dialog" aria-label="الإشعارات" hidden><div class="ub-ph"><b>الإشعارات</b><button type="button" id="ubR">تحديد الكل كمقروء</button></div><div class="ub-l" id="ubL"><p class="ub-empty">جارٍ التحميل…</p></div><a class="ub-all" id="ubA" href="#" hidden>مشاهدة الكل</a></div></div>
-    <a class="ub-u" href="${ubEsc(home || "#")}" title="${ubEsc(name)}"><span class="ub-av" id="ubAv" aria-hidden="true">${ubEsc(String(name || "").trim().charAt(0))}</span><span class="ub-nm">${ubEsc(ubShortName(name))}</span></a>
+    <div class="ub-n"><button type="button" class="ub-u" id="ubU" title="${ubEsc(name)}" aria-label="قائمة حسابي" aria-expanded="false" aria-haspopup="true" aria-controls="ubUP"><span class="ub-av" id="ubAv" aria-hidden="true">${ubEsc(String(name || "").trim().charAt(0))}</span><span class="ub-nm">${ubEsc(ubShortName(name))}</span><svg class="ub-cv" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <div class="ub-p ub-um" id="ubUP" role="menu" aria-label="حسابي" hidden><div class="ub-mh" id="ubUN">${ubEsc(name)}</div>
+      <a class="ub-mi" role="menuitem" id="ubMpw" href="${ubEsc(pwUrl || UB_PW)}"><span class="ub-ic">${ubIco("lock")}</span><span>تغيير كلمة المرور</span></a>
+      <a class="ub-mi" role="menuitem" id="ubMpf" href="${ubEsc(profUrl || UB_PROF)}"><span class="ub-ic">${ubIco("user")}</span><span>تعديل الملف المهني</span></a></div></div>
     <button type="button" class="ub-out" id="out">${ubIco("logout")}<span>خروج</span></button></div>`;
 }
 // تشغيل الشريط بعد إدراجه (يجوز استدعاؤه بعد كل إعادة رسم للشريط). o: { key, uid, load: async () => [عناصر], allUrl, markAll: async () => {} }
@@ -82,7 +87,7 @@ async function ubLoad() {
   UB.N.sort((a, b) => (ubUnread(b) - ubUnread(a)) || (tv(b) - tv(a))); UB.at = Date.now(); UB.loaded = true; ubPaint();
 }
 async function ubMarkAll() { UB.N.forEach((x) => UB.seen.add(String(x.id))); ubSave(); if (UB.o && UB.o.markAll) { try { await UB.o.markAll(); } catch (_) {} } UB.N = UB.N.map((x) => (x.read != null ? { ...x, read: true } : x)); ubPaint(); }
-const ubClose = () => { [["ubP", "ubB"], ["ubSP", "ubS"]].forEach(([p, b]) => { const P = document.getElementById(p), B = document.getElementById(b); if (P) P.hidden = true; if (B) B.setAttribute("aria-expanded", "false"); }); };
+const ubClose = () => { [["ubP", "ubB"], ["ubSP", "ubS"], ["ubUP", "ubU"]].forEach(([p, b]) => { const P = document.getElementById(p), B = document.getElementById(b); if (P) P.hidden = true; if (B) B.setAttribute("aria-expanded", "false"); }); };
 function ubMount(o) {
   const $u = (s) => document.getElementById(s), B = $u("ubB"), P = $u("ubP"), A = $u("ubA");
   const first = !UB.o || UB.o.key !== o.key || UB.o.uid !== o.uid;
@@ -102,12 +107,15 @@ function ubMount(o) {
   const SW = $u("ubS"), SP = $u("ubSP");
   if (SW && SP) { SW.onclick = (e) => { e.stopPropagation(); const open = SP.hidden; ubClose(); SP.hidden = !open; SW.setAttribute("aria-expanded", String(open)); };
     SP.onclick = (e) => e.stopPropagation(); }
+  const UU = $u("ubU"), UP = $u("ubUP");
+  if (UU && UP) { UU.onclick = (e) => { e.stopPropagation(); const open = UP.hidden; ubClose(); UP.hidden = !open; UU.setAttribute("aria-expanded", String(open)); };
+    UP.onclick = (e) => { e.stopPropagation(); if (e.target.closest("a")) ubClose(); }; }
   B.onclick = (e) => { e.stopPropagation(); const open = P.hidden; if (open) ubClose(); P.hidden = !open; B.setAttribute("aria-expanded", String(open)); if (open && Date.now() - UB.at > 60000) ubLoad(); };
   $u("ubR").onclick = (e) => { e.stopPropagation(); ubMarkAll(); };
   P.onclick = (e) => { e.stopPropagation(); const a = e.target.closest("[data-ubi]"); if (a) { const x = UB.N[+a.dataset.ubi]; if (x) { UB.seen.add(String(x.id)); ubSave(); } ubClose(); } else if (e.target.closest("#ubA")) ubClose(); };
   if (!window.__ubDoc) { window.__ubDoc = true;
     document.addEventListener("click", ubClose);
-    document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; const op = [["ubP", "ubB"], ["ubSP", "ubS"]].find(([p]) => { const x = document.getElementById(p); return x && !x.hidden; });
+    document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; const op = [["ubP", "ubB"], ["ubSP", "ubS"], ["ubUP", "ubU"]].find(([p]) => { const x = document.getElementById(p); return x && !x.hidden; });
       if (op) { ubClose(); const b = document.getElementById(op[1]); if (b) b.focus(); } }); }
   if (first || !UB.loaded) ubLoad(); else ubPaint();
 }
@@ -148,8 +156,14 @@ function ubPage(host, sys) {
   draw(); if (!UB.loaded || Date.now() - UB.at > 30000) ubLoad();
 }
 // تحديث الاسم بعد الدخول (للأنظمة التي تبني الشريط قبل معرفة المستخدم)
-function ubSetName(name, home) {
-  const u = document.querySelector(".ub-u"); if (!u) return; u.title = name || ""; if (home) u.href = home;
+function ubSetName(name, home, pwUrl, profUrl) {
+  const u = document.getElementById("ubU") || document.querySelector(".ub-u"); if (!u) return; u.title = name || "";
+  const pw = document.getElementById("ubMpw"); if (pw && pwUrl) pw.href = pwUrl;
+  const pf = document.getElementById("ubMpf"); if (pf && profUrl) pf.href = profUrl;
+  const nn = document.getElementById("ubUN"); if (nn) nn.textContent = name || "";
   const n = u.querySelector(".ub-nm"); if (n) n.textContent = ubShortName(name);
   const av = document.getElementById("ubAv"); if (av && !av.querySelector("img")) av.textContent = String(name || "").trim().charAt(0);
 }
+const MX_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+// زر إغلاق (×) في أعلى كل نافذة منبثقة، مع بقاء أزرار الإغلاق السفلية؛ يُعاد إدراجه إذا أُعيد رسم محتوى النافذة
+function modalX(md, close) { const sync = () => { const cur = md.querySelector(":scope>.mx"), f = [...md.children].find((c) => !c.classList.contains("mx")), has = f && (f.hasAttribute("data-x") || f.querySelector("[data-x]")); if (has) { if (cur) cur.remove(); return; } if (cur) return; const b = document.createElement("button"); b.type = "button"; b.className = "mx"; b.setAttribute("aria-label", "إغلاق"); b.innerHTML = MX_SVG; b.onclick = close; md.prepend(b); }; sync(); new MutationObserver(sync).observe(md, { childList: true }); }
