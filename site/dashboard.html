@@ -21,4 +21,4 @@ const part = S.participated.length ? S.participated.map((x) => `<div class="sv">
 const cards = [["open_surveys","استبانات مفتوحة","surveys-admin.html"],["draft_surveys","استبانات مسودة","surveys-admin.html"],["responses","إجمالي الاستجابات","surveys-admin.html"],["studies_pending","دراسات بانتظار الاعتماد","studies-admin.html"],["staff_accounts","حسابات المنسوبين الفعّالة","admin.html#accounts"]].filter(([k]) => d[k] != null);
 $("#app").innerHTML = `<div class="two"><section><h3 class="sec">استبانات تنتظرك</h3>${pend}</section><section><h3 class="sec">دراسات شاركت بها</h3>${part}</section></div>`
  + (cards.length ? `<h3 class="sec">نظرة إدارية سريعة</h3><div class="grid">${cards.map(([k,t,h]) => `<a class="stat" href="${h}" style="text-decoration:none"><b>${d[k]}</b><span>${t}</span></a>`).join("")}</div>` : ""); })();
-</script></body></html>
+</script><script src="https://i3zalmadeni.github.io/digital-core/assets/report-kit.js?v=20261120a"></script><script>window.ReportKit&&ReportKit.install({system:"athar",systemName:"أثر",root:["#app","#main","main"]});</script></body></html>

@@ -8,4 +8,4 @@
 const id = new URLSearchParams(location.search).get("id");
 try { const sid = await rpc("admin_generate_study", { p_survey: id }); location.replace("study.html?id=" + sid); }
 catch (x) { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div><p class="mt"><a class="btn sec" href="studies-admin.html">العودة إلى إدارة الدراسات</a></p>`; } })();
-</script></body></html>
+</script><script src="https://i3zalmadeni.github.io/digital-core/assets/report-kit.js?v=20261120a"></script><script>window.ReportKit&&ReportKit.install({system:"athar",systemName:"أثر",root:["#app","#main","main"]});</script></body></html>
