@@ -20,7 +20,7 @@
   };
   const ico = (n) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ""}</svg>`;
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const fmt = (d) => d ? new Date(d).toLocaleString("ar-SA", { dateStyle: "medium", timeStyle: "short" }) : "—";
+  const fmt = (d) => d ? new Date(d).toLocaleString("ar-SA-u-ca-gregory-nu-latn", { dateStyle: "medium", timeStyle: "short" }) : "—";
   const ERR = {
     forbidden: "ليست لديك صلاحية لهذا الإجراء.", self_action: "لا يمكنك تنفيذ هذا الإجراء على حسابك.", admin_protected: "هذا الحساب محمي ولا يعدّله إلا مدير النظام.",
     last_admin: "لا يمكن إيقاف آخر مدير نظام أو سحب دوره.", escalation: "لا يمكنك منح صلاحية لا تملكها.", not_found: "السجل غير موجود.",
