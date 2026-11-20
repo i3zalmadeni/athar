@@ -31,7 +31,7 @@ const dir = () => location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
         ${p !== null ? `<div class="ax-pg" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p}%"></i></div><em>${p}%</em>` : '<div class="ax-pg off"><i></i></div><em>بلا هدف</em>'}</div>
       ${x.round > 1 ? `<div class="ax-r">الإجمالي عبر الجولات: ${x.responses}</div>` : ""}
       ${pub && x.token && x.status !== "closed" ? `<div class="ax-l"><code dir="ltr">${esc(dir().replace(/^https?:\/\//, ""))}s/${esc(x.token)}</code><button class="btn sm sec" data-cp="${x.id}">نسخ</button></div>` : ""}
-      <div class="ax-a">${main}${x.status !== "draft" ? `<a class="btn sm sec" href="${x.study_id ? "study.html?id=" + x.study_id : "studies-admin.html"}">${x.status === "open" ? "النتائج الحية" : "الدراسة"}</a>` : `<button class="btn sm sec" data-e="${x.id}">تعديل</button>`}
+      <div class="ax-a">${main}${x.status !== "draft" ? `<a class="btn sm sec" href="${x.study_id ? "study.html?id=" + x.study_id : "studies-admin.html"}">${x.status === "open" ? "النتائج الحية" : "الدراسة"}</a>${x.study_id ? `<a class="btn sm sec" href="study.html?id=${x.study_id}&v=doc">الدراسة التفصيلية</a>` : ""}` : `<button class="btn sm sec" data-e="${x.id}">تعديل</button>`}
         <span class="ax-sp"></span>${x.status === "open" ? `<button class="ax-g bad" data-c="${x.id}">إغلاق</button>` : ""}${x.status === "draft" ? `<button class="ax-g bad" data-x="${x.id}">حذف</button>` : ""}<button class="ax-g" data-t2="${x.id}" aria-label="عرض الأسئلة">${isOpen ? "إخفاء الأسئلة" : "الأسئلة"}</button></div>
       ${isOpen ? `<div class="ax-q" id="q-${x.id}"><span class="spin"></span></div>` : ""}</article>`; };
   function paint() {
