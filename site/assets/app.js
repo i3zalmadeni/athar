@@ -71,7 +71,7 @@
     document.body.classList.toggle("pubsite", !app);
     if (!app) {
       $("#hdr").innerHTML = `<header><div class="wrap top">${brand("index.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false" id="nt">${ico("menu")}</button>
-        <nav id="nv">${PUB_NAV.map(([h, t, i]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""}>${ico(i)}${t}</a>`).join("")}<a href="${me ? "dashboard.html" : "login.html"}" class="${active === "login.html" ? "on" : ""}">${ico("grid")}${me ? "لوحة التحكم" : "دخول المنسوبين"}</a></nav>${headMoe}</div></header>`;
+        <nav id="nv">${PUB_NAV.map(([h, t, i]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""}>${ico(i)}${t}</a>`).join("")}<a href="${me ? "dashboard.html" : "login.html"}" class="${active === "login.html" ? "on" : ""}">${ico("grid")}${me ? "لوحة التحكم" : "تسجيل الدخول"}</a></nav>${headMoe}</div></header>`;
       $("#nt").onclick = () => { const o = $("#nv").classList.toggle("open"); $("#nt").setAttribute("aria-expanded", o); };
     } else {
       const act = me.status === "active", sm = act && can("surveys:manage"), adm = act && ["audit:view","settings:manage","integration:view"].some(can);
