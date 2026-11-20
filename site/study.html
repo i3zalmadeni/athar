@@ -23,7 +23,7 @@ const EXCSS = "#rkRoot .rk-body .ex-msg{border:1px solid #c9dbe1;border-radius:1
   + ".ex-r{margin:2px 0 8px;padding-inline-start:20px;font-size:12px;line-height:1.75}.ex-r .pr{display:inline-block;font-size:10px;font-weight:800;color:#8a6200;background:#fff0cc;border-radius:99px;padding:0 8px;margin-inline-end:6px}.ex-n{font-size:10.5px;color:#71859a;border-top:1px dashed #c9dbe1;padding-top:6px;margin-top:6px}";
 const printDoc = (r, kind) => { const ex = kind === "exec", body = ex ? SD.exec(r, rel, { esc, schoolName: A.C.schoolName }) : SD.build(r, rel, { esc, schoolName: A.C.schoolName }), sv = r.snapshot.survey || {};
   if (!window.ReportKit || !ReportKit.print) { view = ex ? "exec" : "doc"; paint(r); return window.print(); }
-  ReportKit.print({ system: "athar", systemName: "أثر", flow: !ex, title: ex ? "الملخص التنفيذي" : "دراسة قياس الأثر", sub: sv.title || "", kicker: "أثر · قياس الأثر · " + A.C.schoolName, body, styles: SDCSS + EXCSS, fname: (ex ? "ملخص تنفيذي – " : "دراسة – ") + (sv.title || "أثر") }); };
+  ReportKit.print({ sb: A.sb, system: "athar", systemName: "أثر", flow: !ex, title: ex ? "الملخص التنفيذي" : "دراسة قياس الأثر", sub: sv.title || "", kicker: "أثر · قياس الأثر · " + A.C.schoolName, body, styles: SDCSS + EXCSS, fname: (ex ? "ملخص تنفيذي – " : "دراسة – ") + (sv.title || "أثر") }); };
 const item = (x, i, names) => { const d = names[x.domain] || ""; let h = `<div class="qx"><h4><span class="qn">${i + 1}</span><span>${esc(x.prompt)}<small class="hint" style="display:block">${esc(d)}</small></span>${x.kind === "scale" ? `<span class="m" style="background:${CH.tone(x.mean)}">${x.mean ?? "—"}</span>` : ""}</h4>`;
   if (x.kind === "scale") h += CH.stack(x.dist.slice(0, 4), x.options, x.answered) + `<p class="hint">أجاب ${x.answered} · موافقون ${x.favorable_pct ?? 0}% · غير موافقين ${x.unfavorable_pct ?? 0}%</p>`;
   else if (x.kind === "choice") h += CH.donut(x.options || []);
@@ -79,4 +79,4 @@ function schedule() { clearTimeout(timer); if (cur && cur.can_manage && cur.stat
 document.addEventListener("visibilitychange", () => { if (!document.hidden && cur && cur.snapshot.live) tick(); });
 try { cur = await fetchStudy(false); paint(cur); schedule(); } catch (x) { fail(x); }
 })();
-</script><script src="https://i3zalmadeni.github.io/digital-core/assets/report-kit.js?v=20261120d"></script><script>window.ReportKit&&ReportKit.install({system:"athar",systemName:"أثر",root:["#app","#main","main"]});</script></body></html>
+</script><script src="https://i3zalmadeni.github.io/digital-core/assets/report-kit.js?v=20261120e"></script><script>window.ReportKit&&ReportKit.install({system:"athar",systemName:"أثر",root:["#app","#main","main"]});</script></body></html>
