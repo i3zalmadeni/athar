@@ -206,3 +206,50 @@ header .top .corelnk{order:2;flex:none}
 @media (prefers-reduced-motion:reduce){.ch-poly,.ch-br,.qx,.kp>div{animation:none}}
 
 .stk{display:grid;grid-template-columns:1fr;gap:12px}.stk label{margin:0 0 4px;font-weight:600}
+
+/* ===== الدراسة التفصيلية (2026-11-20): عرض بالهوية الموحدة لتقارير النواة الرقمية ===== */
+.vtabs{display:inline-flex;gap:3px;padding:4px;margin:10px 0 4px;background:var(--soft,#eef8fa);border-radius:14px}
+.vtabs button{font:inherit;font-weight:800;font-size:.92rem;border:0;background:transparent;color:var(--brand2,#0c6f82);border-radius:11px;padding:8px 18px;cursor:pointer}
+.vtabs button.on{background:#fff;color:#0d2b45;box-shadow:0 1px 5px rgba(13,43,69,.15)}
+.vtabs button:focus-visible{outline:3px solid #f0b34a}
+.sd{max-width:210mm;margin:14px auto 30px;background:#fff;border:1px solid #dbe8ec;border-radius:6px;box-shadow:0 8px 30px rgba(13,43,69,.12);padding:10mm 12mm;color:#0d2b45;line-height:1.85}
+.sd-uh{display:flex;align-items:center;gap:14px;padding-bottom:8px}
+.sd-uh .k,.sd-uh .m{flex:1;display:flex;flex-direction:column}
+.sd-uh .k{line-height:1.6;align-items:flex-start}.sd-uh .k b{font-size:.86rem}.sd-uh .k span{font-size:.76rem;color:#3d566b}
+.sd-uh .c{flex:1.3;display:flex;align-items:center;justify-content:center;gap:10px}
+.sd-uh .core{display:flex;align-items:center;gap:6px;line-height:1.25}.sd-uh .core img{width:48px;height:48px}.sd-uh .core b{display:block;font-size:.9rem;color:#0c6f82;white-space:nowrap}.sd-uh .core small{display:block;font-size:.68rem;color:#71859a}
+.sd-uh .sep{display:block;width:1.5px;height:54px;background:#f0b34a;border-radius:2px}
+.sd-uh .moe{height:70px;max-width:104px;object-fit:contain}
+.sd-uh .m{align-items:flex-end;font-size:.74rem;line-height:1.8;color:#3d566b}.sd-uh .m div{display:flex;gap:5px}.sd-uh .m span{color:#71859a}
+.sd-bar{display:flex;height:4px;border-radius:4px;overflow:hidden;margin:0 0 14px}.sd-bar i{display:block}.sd-bar i:nth-child(1){flex:2.2;background:#0d2b45}.sd-bar i:nth-child(2){flex:1.2;background:#f0b34a}.sd-bar i:nth-child(3){flex:6;background:#0f8a94}
+.sd-ttl{position:relative;text-align:center;margin:0 0 18px;padding:16px 22px 20px;border-radius:16px;background:linear-gradient(160deg,#fff7f6 0%,#fff 45%,#f1f9fa 100%);border:1px solid #ecd9d6}
+.sd-ttl::before,.sd-ttl::after{content:"";position:absolute;width:60px;height:60px;border:3px solid #f0b34a}
+.sd-ttl::before{top:-2px;right:-2px;border-left:0;border-bottom:0;border-top-right-radius:16px}.sd-ttl::after{bottom:-2px;left:-2px;border-right:0;border-top:0;border-bottom-left-radius:16px}
+.sd-ttl .k{display:block;font-size:.8rem;font-weight:700;color:#0c6f82}
+.sd-ttl h1{margin:2px 0 0;font-size:1.75rem;font-weight:800;color:#8f1d1d;line-height:1.45}
+.sd-ttl .e{display:inline-flex;align-items:center;gap:8px;margin:10px auto 0;padding:6px 22px;border-radius:999px;background:#8f1d1d;color:#fff;font-weight:800;font-size:1rem}
+.sd-ttl .e::before{content:"";width:8px;height:8px;border-radius:50%;background:#f0b34a}
+.sd-body h2{font-size:1.15rem;color:#0d2b45;border-right:5px solid #f0b34a;padding:4px 10px 4px 0;margin:26px 0 8px;background:linear-gradient(270deg,#e8f6f7,rgba(232,246,247,0))}
+.sd-body h3{font-size:1rem;color:#0c6f82;margin:16px 0 4px}
+.sd-body p{margin:4px 0 8px;text-align:justify}
+.sd-body .box{border:1px solid #c9dbe1;border-radius:8px;padding:8px 12px;margin:6px 0 10px;background:#fbfdfd;box-shadow:inset -3px 0 0 #0f8a94;font-weight:700}
+.sd-body .sd-l{margin:4px 0 10px;padding-inline-start:22px}.sd-body .sd-l li{margin:3px 0}
+.sd-t{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:.84rem}
+.sd-t th,.sd-t td{border:1px solid #b9cdd5;padding:5px 7px;text-align:right;vertical-align:top}
+.sd-t th{background:#e3f6f7;font-weight:800}
+.sd-t tr.sum td{background:#f4fafb;font-weight:800}
+.sd-t td.fq small{display:block;font-size:.7rem;color:#71859a}
+.sd-items td,.sd-items th{font-size:.78rem;padding:4px 5px}
+.sd-kv td:first-child{width:62%}
+.sd-fn{font-size:.76rem;color:#5b7a8a;margin:2px 0 8px}
+.sd-cap{font-weight:800;color:#0c6f82;margin:10px 0 2px}
+.sd-foot{text-align:center;font-size:.76rem;color:#71859a;margin:4px 0 0}
+@media(max-width:700px){
+  .sd{padding:14px 10px;border-radius:12px}
+  .sd-uh{flex-wrap:wrap;gap:8px}.sd-uh .c{order:-1;flex:1 1 100%}.sd-uh .k{flex:1 1 50%}.sd-uh .m{flex:1 1 40%;font-size:.68rem}.sd-uh .m div{white-space:nowrap}
+  .sd-uh .moe{height:52px}.sd-uh .core img{width:38px;height:38px}
+  .sd-ttl{padding:14px 12px 16px}.sd-ttl h1{font-size:1.35rem}.sd-ttl .e{font-size:.86rem;padding:5px 14px}
+  .sd-t{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .vtabs{display:flex}.vtabs button{flex:1;padding:8px 6px}
+}
+@media print{.vtabs{display:none}.sd{box-shadow:none;border:0;padding:0;max-width:none}}

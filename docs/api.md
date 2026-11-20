@@ -13,6 +13,7 @@
 ## الاستبانات والدراسات (0008)
 - الفئات: student، teacher، administrative، supervisor، parent. المعلم يطابق فئة `teaching` في النواة، والإداري يطابق `administrative`؛ ولا استبانة موجهة للدعم حالياً.
 - المنسوب: `athar_surveys_me` (حسب فئته)، `athar_survey_get|submit`، `athar_study_get` (للمشارك بعد اعتماد الدراسة).
+- `athar_study_reliability(p_id)` (0013): مؤشرات الصدق والثبات للدراسة التفصيلية — ألفا كرونباخ للأداة ولكل محور، والانحراف المعياري لدرجات المشاركين، وارتباط بيرسون لكل عبارة بمحورها وبالأداة؛ من الاستجابات المكتملة، وبصلاحية `athar_study_get` نفسها.
 - الإدارة (`surveys:manage`): `athar_admin_surveys|get_survey|save_survey|set_survey_status|delete_survey|respondents|generate_study|studies|update_study|approve_study`، و`athar_survey_results`.
 - الرابط العام يُولَّد عند فتح استبانة المتعلم أو ولي الأمر أو الجهة المشرفة. الحد الأقصى للإرسال من عنوان واحد: `surveys.max_per_ip_10min` (100 افتراضياً لأن شبكة المدرسة تشترك في عنوان).
 - لا تُنشأ دراسة قبل الإغلاق ولا بأقل من `surveys.min_respondents` مشاركاً. نصوص الإجابات الحرة لا تدخل لقطة الدراسة.
