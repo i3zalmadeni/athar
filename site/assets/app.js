@@ -44,7 +44,16 @@
 
   const CORE_ICON = '<svg class="core-ic" viewBox="0 0 160 160" aria-hidden="true"><defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18a4ab"/><stop offset="1" stop-color="#0c6f82"/></linearGradient></defs><circle cx="80" cy="80" r="76" fill="#fff"/><g class="ci-ring"><circle cx="80" cy="80" r="62" fill="none" stroke="#4fa39a" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 10.8"/></g><circle cx="80" cy="80" r="42" fill="url(#cg)"/><text x="80" y="101" text-anchor="middle" font-family="Tajawal,Tahoma,Arial,sans-serif" font-size="70" font-weight="800" fill="#fff">ن</text><g class="ci-orb"><circle cx="80" cy="16" r="8" fill="#f0b34a"/><circle cx="24.6" cy="112" r="8" fill="#e0955a"/><circle cx="135.4" cy="112" r="8" fill="#4fa39a"/></g></svg>';
   const state = { me: null };
-  async function loadMe() { const { data } = await sb.auth.getSession(); if (!data.session) return null; try { state.me = await rpc("me"); } catch (_) { try { state.me = await rpc("staff_session"); } catch (__) { state.me = null; } } return state.me; }
+  async function loadMe() { const { data } = await sb.auth.getSession(); if (!data.session) return null; try { state.me = await rpc("me"); } catch (_) { try { state.me = await rpc("staff_session"); } catch (__) { state.me = null; } } rvApply(data.session.user.id); return state.me; }
+  // تبديل الدور: منسق أثر (إدارة الاستبانات أو إدارة البوابة) يختار بين لوحة المنسق ولوحة المعلم (استباناتي ودراساتي)
+  const RV_MANAGE = ["surveys:manage", "audit:view", "settings:manage", "integration:view"];
+  function rvApply(uid) {
+    const me = state.me; if (!me || !Array.isArray(me.permissions)) return;
+    me.rv_can = me.status === "active" && RV_MANAGE.some((p) => me.permissions.includes(p)); me.rv_uid = uid;
+    me.rv_view = window.RoleSwitch ? RoleSwitch.view("athar", uid, me.rv_can) : "coord";
+    me.rv_coord = me.rv_can && me.rv_view === "coord";
+    if (me.rv_can && !me.rv_coord) me.permissions = me.permissions.filter((p) => !RV_MANAGE.includes(p) && !/:manage$/.test(p));
+  }
   const can = (p) => !!state.me && state.me.status === "active" && state.me.permissions.includes(p);
 
   // شعار أثر: موجات تتسع من نقطة ذهبية (الأثر ينتشر من فعل واحد)، داخل دائرة النواة المدارية نفسها
@@ -67,7 +76,10 @@
     } else {
       const act = me.status === "active", sm = act && can("surveys:manage"), adm = act && ["audit:view","settings:manage","integration:view"].some(can);
       const TABKEY = { "survey.html": "dashboard.html", "survey-results.html": "studies-admin.html", "study.html": sm ? "studies-admin.html" : "dashboard.html", "notifications.html": "dashboard.html" }, on = TABKEY[active] || active;
-      const tabs = [["dashboard.html"], ...(sm ? [["surveys-admin.html"], ["studies-admin.html"]] : []), ...(adm ? [["admin.html"]] : [])];
+      const tabs = [...(me.rv_coord ? [] : [["dashboard.html"]]), ...(sm ? [["surveys-admin.html"], ["studies-admin.html"]] : []), ...(adm ? [["admin.html"]] : [])];
+      const rvHome = tabs[0][0];
+      if (me.rv_coord && active === "dashboard.html") { location.replace(rvHome); return; }   // لوحة المنسق: بلا استباناتي الشخصية
+      if (me.rv_can && !me.rv_coord && ["surveys-admin.html", "studies-admin.html", "admin.html"].includes(active)) { location.replace("dashboard.html"); return; }
       const cur = PAGES[active], roles = me.roles.map((r) => r.name_ar).join("، ");
       $("#hdr").innerHTML = `<header class="dash"><div class="wrap top">${brand("dashboard.html")}<div class="idl"><a class="sitelink" href="index.html">الموقع الإلكتروني</a>${headMoe}</div></div><div class="strip" aria-hidden="true"></div>
         <div class="dnav"><div class="wrap dn"><button type="button" class="dmb" id="dmb" aria-expanded="false" aria-controls="dnavIn">${ico("menu")}<span class="dmb-t">القائمة</span><svg class="dmb-ch" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
@@ -83,6 +95,7 @@
       const lo = $("#out"); lo.onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("index.html"); };   // الخروج يعيد إلى رئيسية النظام
       // الجرس المنبثق وقائمة الأنظمة والصورة: من شريط المستخدم الموحّد نفسه
       const TONE = { account: "info", link: "warn", system: "info" };
+      if (window.RoleSwitch) RoleSwitch.mount({ sys: "athar", uid: me.rv_uid, can: me.rv_can, view: me.rv_view, home: { coord: (sm ? "surveys-admin.html" : "admin.html"), teacher: "dashboard.html" }, teacherDesc: "استباناتي ودراساتي", coordDesc: "إدارة الاستبانات والدراسات والبوابة" });
       ubMount({ key: "athar", uid: me.id, client: sb, allUrl: "notifications.html", load: async () => {
         const L = await rpc("my_notifications", { p_limit: 40 });
         return L.map((n) => ({ id: "n" + n.id, title: n.title, body: n.body, t: n.created_at, read: n.status === "read", tone: TONE[n.kind] || "info", icon: "bell", href: n.link && /^[a-z-]+\.html(\?[\w=&-]+)?(#[a-z]+)?$/.test(n.link) ? n.link : "notifications.html" })); },
