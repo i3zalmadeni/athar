@@ -138,5 +138,28 @@ const SD = (() => {
     out += `<p class="sd-fn">أُعدت هذه الدراسة آلياً في نظام «أثر» من بيانات الاستبانة نفسها، وكل رقم فيها محسوب من استجابات المشاركين؛ وهي أداة مساندة لقرار الإدارة ولا تُعد تقويماً لأداء أحد.</p>`;
     return out;
   }
-  return { build, deg, istat };
+  /* الملخص التنفيذي: صفحة واحدة لصاحب القرار — الأرقام الرئيسة، المحاور، أبرز القوة وفرص التحسين، والتوصيات ذات الأولوية */
+  function exec(r, rel, o) {
+    const esc = o.esc, school = o.schoolName || "المدرسة", sn = r.snapshot || {}, sv = sn.survey || {}, au = sv.audience, R = rel || {};
+    const scale = (sn.items || []).filter((x) => x.kind === "scale"), n = sn.participants || 0, N = sn.eligible || null, tg = sn.target || null, staff = STAFF.has(au);
+    const rate = N ? pc(n, N) : tg ? pc(n, tg) : null, om = sn.overall_mean != null ? Number(sn.overall_mean) : null;
+    const doms = [...(sn.domains || [])].filter((d) => d.mean != null).sort((a, b) => b.mean - a.mean);
+    const allSt = scale.map((x) => ({ x, s: istat(x) })).filter((z) => z.s.m != null).sort((a, b) => b.s.m - a.s.m);
+    const str = (sn.strengths || []).slice(0, 3).map((x) => ({ t: x.text || x.prompt, p: x.prompt, m: x.mean })), strFb = !str.length;
+    const S = strFb ? allSt.slice(0, 3).map((z) => ({ t: z.x.prompt, m: z.s.m })) : str;
+    const gp = (sn.gaps || []).slice(0, 3).map((x) => ({ t: x.prompt, m: x.mean })), gpFb = !gp.length;
+    const G = gpFb ? allSt.slice(-3).reverse().map((z) => ({ t: z.x.prompt, m: z.s.m, u: z.x.unfavorable_pct })) : gp;
+    const recs = (r.recommendations || []).slice(0, 4), hi = doms[0], lo = doms[doms.length - 1];
+    const fav = scale.reduce((a, x) => a + (x.dist ? x.dist[2] + x.dist[3] : 0), 0), allv = scale.reduce((a, x) => a + (x.answered || 0), 0);
+    const tone = (m) => (m == null ? "#9db4bc" : m >= 3.26 ? "#2e9e6b" : m >= 2.51 ? "#18a4ab" : m >= 1.76 ? "#e3a93c" : "#d9534f");
+    const msg = om == null ? "لا تتوفر بيانات كافية بعد." : `المستوى العام ${deg(om)} (${f2(om)} من 4)${hi && lo && hi !== lo ? `؛ أقوى المحاور ${"«" + esc(hi.name) + "»"} وأولاها بالتحسين ${"«" + esc(lo.name) + "»"}` : ""}${(sn.gaps || []).length ? `، مع ${(sn.gaps || []).length} ${(sn.gaps || []).length > 2 ? "عبارات" : "عبارة"} دون 2.80 تستدعي تدخلاً.` : "، ولا توجد عبارات دون حد المتابعة (2.80)."}`;
+    let h = `<div class="ex-msg"><b>الخلاصة:</b> ${msg}</div>`;
+    h += `<div class="ex-k"><div><b>${n}</b><span>مشاركاً${rate != null ? ` · استجابة ${rate}%` : ""}</span></div><div><b style="color:${tone(om)}">${f2(om)}</b><span>المتوسط العام من 4 · ${deg(om)}</span></div><div><b>${allv ? pc(fav, allv) + "%" : "—"}</b><span>إجابات إيجابية (3 و4)</span></div><div><b>${R.alpha != null ? f2(R.alpha) : "—"}</b><span>ثبات الأداة (ألفا) · ${alphaTxt(R.alpha)}</span></div></div>`;
+    h += `<h3>النتائج حسب المحور</h3><div class="ex-d">${doms.map((d, i) => `<div><span class="nm">${i + 1}. ${esc(d.name)}</span><span class="br"><i style="width:${Math.round((100 * d.mean) / 4)}%;background:${tone(d.mean)}"></i></span><b>${f2(d.mean)}</b><em>${deg(d.mean)}</em></div>`).join("")}</div>`;
+    h += `<div class="ex-2"><div class="ok"><h4>أبرز نقاط القوة${strFb ? " (أعلى العبارات)" : ""}</h4><ul>${S.map((x) => `<li>${esc(x.t)} <b>${f2(x.m)}</b></li>`).join("") || "<li>—</li>"}</ul></div><div class="bad"><h4>${gpFb ? "أولويات التحسين (أدنى العبارات)" : "نقاط الضعف"}</h4><ul>${G.map((x) => `<li>${esc(x.t)} <b>${f2(x.m)}</b></li>`).join("") || "<li>—</li>"}</ul></div></div>`;
+    h += `<h3>التوصيات ذات الأولوية</h3><ol class="ex-r">${recs.map((x) => `<li><span class="pr">${esc(x.priority || "")}</span>${esc(x.text)}</li>`).join("")}</ol>`;
+    h += `<p class="ex-n">${staff ? "مجتمع الدراسة" : "الفئة المستهدفة"}: ${AUDP[au] || "—"} في ${esc(school)}${N || tg ? ` (${N || tg})` : ""} · ${scale.length} عبارة في ${doms.length} محاور بمقياس رباعي · ${r.status === "approved" ? "دراسة معتمدة" : "مسودة لم تُعتمد بعد"} · التفاصيل في الدراسة التفصيلية.</p>`;
+    return h;
+  }
+  return { build, exec, deg, istat };
 })();

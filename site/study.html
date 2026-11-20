@@ -6,7 +6,7 @@
 <script>
 (async () => { if (!(await A.guard("study.html"))) return; const { esc, rpc, $, fmt, msg } = A;
 const AUD = { student: "المتعلم", teacher: "المعلم", administrative: "الهيئة الإدارية", supervisor: "الجهة المشرفة", parent: "ولي الأمر" };
-const id = new URLSearchParams(location.search).get("id"); let dom = "all", timer = null, texts = null, lastAt = null, rel = null, view = new URLSearchParams(location.search).get("v") === "doc" ? "doc" : "res";
+const id = new URLSearchParams(location.search).get("id"); let dom = "all", timer = null, texts = null, lastAt = null, rel = null, view = (() => { const v = new URLSearchParams(location.search).get("v"); return ["doc", "res", "exec"].includes(v) ? v : "exec"; })();
 const fail = (x) => { $("#app").innerHTML = `<div class="alert bad">${esc(msg(x))}</div><p><a class="btn sec" href="dashboard.html">العودة إلى مكتبي الإلكتروني</a></p>`; };
 async function fetchStudy(refresh) {   // المدير يرى مسودة حية: نحدّثها من الإجابات الحالية قبل العرض
   let r = await rpc("study_get", { p_id: id });
@@ -16,9 +16,14 @@ async function fetchStudy(refresh) {   // المدير يرى مسودة حية:
   lastAt = new Date(); return r; }
 /* الدراسة التفصيلية: عرض على الشاشة بالهوية الموحدة، وطباعة عبر ReportKit (ترويسة وتذييل ورمز تحقق في كل صفحة) */
 const SDCSS = ".sd-fn{font-size:11px;color:#5b7a8a;margin:2px 0 8px}.sd-cap{font-weight:800;color:#0c6f82;margin:8px 0 2px}.sd-l{margin:4px 0 8px;padding-inline-start:22px}.sd-l li{margin:2px 0}#rkRoot .rk-body .sd-t td.fq small{display:block;font-size:9.5px;color:#71859a}#rkRoot .rk-body .sd-t tr.sum td{background:#f4fafb;font-weight:800}#rkRoot .rk-body .sd-items td,#rkRoot .rk-body .sd-items th{padding:4px 5px;font-size:11.5px}#rkRoot .rk-body .sd-kv td:first-child{width:62%}";
-const printDoc = (r) => { const body = SD.build(r, rel, { esc, schoolName: A.C.schoolName }), sv = r.snapshot.survey || {};
-  if (!window.ReportKit || !ReportKit.print) { view = "doc"; paint(r); return window.print(); }
-  ReportKit.print({ system: "athar", systemName: "أثر", title: "دراسة قياس الأثر", sub: sv.title || "", kicker: "أثر · قياس الأثر · " + A.C.schoolName, body, styles: SDCSS, fname: "دراسة – " + (sv.title || "أثر") }); };
+const EXCSS = "#rkRoot .rk-body .ex-msg{border:1px solid #c9dbe1;border-radius:10px;padding:8px 12px;margin:0 0 10px;background:#fbfdfd;box-shadow:inset -4px 0 0 #f0b34a;font-size:13px;line-height:1.8}"
+  + ".ex-k{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 6px}.ex-k>div{border:1px solid #c9dbe1;border-radius:10px;padding:8px 6px;text-align:center;background:linear-gradient(180deg,#f4fbfc,#fff)}.ex-k b{display:block;font-size:22px;line-height:1.2;color:#0c6f82}.ex-k span{font-size:10.5px;color:#5b7a8a;line-height:1.4;display:block}"
+  + ".ex-d{display:grid;gap:6px;margin:4px 0 6px}.ex-d>div{display:grid;grid-template-columns:42% 1fr 40px 74px;align-items:center;gap:8px;font-size:12px}.ex-d .br{height:10px;background:#e8f1f3;border-radius:6px;overflow:hidden;display:flex}.ex-d .br i{display:block;height:100%;border-radius:6px;margin-left:auto}.ex-d b{color:#0d2b45;text-align:left}.ex-d em{font-style:normal;font-size:11px;color:#5b7a8a}"
+  + ".ex-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}.ex-2>div{border-radius:10px;padding:8px 12px;border:1px solid #c9dbe1}.ex-2 .ok{background:#f1faf5;border-color:#bfe3cf}.ex-2 .bad{background:#fff7f0;border-color:#f0d3b4}.ex-2 h4{margin:0 0 4px;font-size:13px;color:#0d2b45}.ex-2 ul{margin:0;padding-inline-start:18px;font-size:12px;line-height:1.7}.ex-2 b{color:#0c6f82;margin-inline-start:4px}"
+  + ".ex-r{margin:2px 0 8px;padding-inline-start:20px;font-size:12px;line-height:1.75}.ex-r .pr{display:inline-block;font-size:10px;font-weight:800;color:#8a6200;background:#fff0cc;border-radius:99px;padding:0 8px;margin-inline-end:6px}.ex-n{font-size:10.5px;color:#71859a;border-top:1px dashed #c9dbe1;padding-top:6px;margin-top:6px}";
+const printDoc = (r, kind) => { const ex = kind === "exec", body = ex ? SD.exec(r, rel, { esc, schoolName: A.C.schoolName }) : SD.build(r, rel, { esc, schoolName: A.C.schoolName }), sv = r.snapshot.survey || {};
+  if (!window.ReportKit || !ReportKit.print) { view = ex ? "exec" : "doc"; paint(r); return window.print(); }
+  ReportKit.print({ system: "athar", systemName: "أثر", title: ex ? "الملخص التنفيذي" : "دراسة قياس الأثر", sub: sv.title || "", kicker: "أثر · قياس الأثر · " + A.C.schoolName, body, styles: SDCSS + EXCSS, fname: (ex ? "ملخص تنفيذي – " : "دراسة – ") + (sv.title || "أثر") }); };
 const item = (x, i, names) => { const d = names[x.domain] || ""; let h = `<div class="qx"><h4><span class="qn">${i + 1}</span><span>${esc(x.prompt)}<small class="hint" style="display:block">${esc(d)}</small></span>${x.kind === "scale" ? `<span class="m" style="background:${CH.tone(x.mean)}">${x.mean ?? "—"}</span>` : ""}</h4>`;
   if (x.kind === "scale") h += CH.stack(x.dist.slice(0, 4), x.options, x.answered) + `<p class="hint">أجاب ${x.answered} · موافقون ${x.favorable_pct ?? 0}% · غير موافقين ${x.unfavorable_pct ?? 0}%</p>`;
   else if (x.kind === "choice") h += CH.donut(x.options || []);
@@ -30,21 +35,21 @@ function paint(r) { const sn = r.snapshot, mg = r.can_manage;
   const sv = sn.survey, live = !!sn.live, names = Object.fromEntries(sn.domains.map((d) => [d.code, d.name])), scale = sn.items.filter((x) => x.kind === "scale"), n = sn.participants, tg = sn.target;
   const shown = sn.items.filter((x) => dom === "all" || x.domain === dom), rank = [...scale].filter((x) => x.mean != null).sort((a, b) => b.mean - a.mean);
   const fav = scale.reduce((a, x) => a + (x.dist ? x.dist[2] + x.dist[3] : 0), 0), allv = scale.reduce((a, x) => a + (x.answered || 0), 0);
-  const tabs = `<div class="vtabs" role="tablist" aria-label="عرض الدراسة"><button role="tab" data-v="res" aria-selected="${view === "res"}" class="${view === "res" ? "on" : ""}">ملخص النتائج</button><button role="tab" data-v="doc" aria-selected="${view === "doc"}" class="${view === "doc" ? "on" : ""}">الدراسة التفصيلية</button></div>`;
-  if (view === "doc") { const D = new Date();
+  const tabs = `<div class="vtabs" role="tablist" aria-label="عرض الدراسة"><button role="tab" data-v="exec" aria-selected="${view === "exec"}" class="${view === "exec" ? "on" : ""}">الملخص التنفيذي</button><button role="tab" data-v="res" aria-selected="${view === "res"}" class="${view === "res" ? "on" : ""}">ملخص النتائج</button><button role="tab" data-v="doc" aria-selected="${view === "doc"}" class="${view === "doc" ? "on" : ""}">الدراسة التفصيلية</button></div>`;
+  if (view === "doc" || view === "exec") { const D = new Date(), ex = view === "exec";
     $("#app").innerHTML = `<div class="row2"><h2>${esc(sv.title)}</h2><span class="badge ${r.status === "approved" ? "ok" : "warn"}">${r.status === "approved" ? "دراسة معتمدة" : "مسودة دراسة"}</span></div>${tabs}
-    <p class="mt acts"><button class="btn" id="pd">طباعة الدراسة التفصيلية / حفظ PDF</button><a class="btn sec" href="${mg ? "studies-admin.html" : "dashboard.html"}">رجوع</a></p>
-    <article class="sd">
+    <p class="mt acts"><button class="btn" id="pd">${ex ? "طباعة الملخص التنفيذي / حفظ PDF" : "طباعة الدراسة التفصيلية / حفظ PDF"}</button><a class="btn sec" href="${mg ? "studies-admin.html" : "dashboard.html"}">رجوع</a></p>
+    <article class="sd${ex ? " sd-ex" : ""}">
       <header class="sd-uh"><div class="k"><b>المملكة العربية السعودية</b><b>وزارة التعليم</b><span>الإدارة العامة للتعليم بمحافظة الأحساء</span><span>مدرسة لبيد بن ربيعة المتوسطة</span></div>
         <div class="c"><span class="core"><img src="https://i3zalmadeni.github.io/digital-core/assets/core-logo.svg" alt=""><span><b>النواة الرقمية</b><small>الهوية الموحدة</small></span></span><i class="sep"></i><img class="moe" src="https://i3zalmadeni.github.io/digital-core/assets/moe-logo.png" alt="وزارة التعليم"></div>
         <div class="m"><div><span>التاريخ:</span><b>${esc(D.toLocaleDateString("ar-SA-u-ca-gregory-nu-latn", { year: "numeric", month: "long", day: "numeric" }))}</b></div><div><span>رقم التقرير:</span><b>يُصدر عند الطباعة</b></div></div></header>
       <div class="sd-bar" aria-hidden="true"><i></i><i></i><i></i></div>
-      <div class="sd-ttl"><span class="k">أثر · قياس الأثر · ${esc(A.C.schoolName)}</span><h1>دراسة قياس الأثر</h1><p class="e">${esc(sv.title)}</p></div>
-      <div class="sd-body">${SD.build(r, rel, { esc, schoolName: A.C.schoolName })}</div>
+      <div class="sd-ttl"><span class="k">أثر · قياس الأثر · ${esc(A.C.schoolName)}</span><h1>${ex ? "الملخص التنفيذي" : "دراسة قياس الأثر"}</h1><p class="e">${esc(sv.title)}</p></div>
+      <div class="sd-body">${ex ? SD.exec(r, rel, { esc, schoolName: A.C.schoolName }) : SD.build(r, rel, { esc, schoolName: A.C.schoolName })}</div>
       <div class="sd-bar" aria-hidden="true"><i></i><i></i><i></i></div><p class="sd-foot">صدر هذا التقرير من «أثر» · أحد أنظمة النواة الرقمية · ${esc(A.C.schoolName)}</p>
     </article>`;
     document.querySelectorAll("[data-v]").forEach((b) => b.onclick = () => { view = b.dataset.v; paint(r); });
-    $("#pd").onclick = () => printDoc(r); return; }
+    $("#pd").onclick = () => printDoc(r, view); return; }
   $("#app").innerHTML = `<div class="row2"><h2>${esc(sv.title)}</h2><span class="badge ${r.status === "approved" ? "ok" : "warn"}">${r.status === "approved" ? "دراسة معتمدة" : live ? "مسودة دراسة · جارية" : "مسودة دراسة · مكتملة"}</span></div>
   <p class="sub">${r.scope === "cumulative" ? `تقرير تراكمي (الجولات 1 إلى ${r.round})` : r.survey_round > 1 || r.round > 1 ? `تقرير الجولة ${r.round}` : "دراسة إلكترونية"} · ${AUD[sv.audience] || ""} · ${esc(A.C.schoolName)}${r.approved_at ? " · اعتُمدت " + fmt(r.approved_at) : ""}</p>
   ${tabs}
@@ -67,7 +72,7 @@ function paint(r) { const sn = r.snapshot, mg = r.can_manage;
   document.querySelectorAll("[data-g]").forEach((b) => b.onclick = async () => { b.disabled = true; try { const sid = await rpc("admin_generate_study", { p_survey: r.survey_id, p_scope: b.dataset.g }); location.href = "study.html?id=" + sid; } catch (x) { b.disabled = false; alert(msg(x)); } });
   document.querySelectorAll("[data-d]").forEach((b) => b.onclick = () => { dom = b.dataset.d; paint(r); });
   document.querySelectorAll("[data-v]").forEach((b) => b.onclick = () => { view = b.dataset.v; paint(r); });
-  $("#pr").onclick = () => window.print(); $("#pr2").onclick = () => printDoc(r); const rf = $("#rf"); if (rf) rf.onclick = () => tick(true); }
+  $("#pr").onclick = () => window.print(); $("#pr2").onclick = () => printDoc(r, "doc"); const rf = $("#rf"); if (rf) rf.onclick = () => tick(true); }
 let cur = null;
 async function tick(now) { try { cur = await fetchStudy(true); paint(cur); } catch (x) { if (!cur) fail(x); } schedule(); }
 function schedule() { clearTimeout(timer); if (cur && cur.can_manage && cur.status === "draft" && cur.snapshot.live && !document.hidden) timer = setTimeout(tick, 20000); }
