@@ -3,7 +3,8 @@
   if (!(await A.guard("admin.html", ["staff"]))) return;
   const { esc, rpc, $, fmt, can, badge, msg, toast, sb } = A, me = A.state.me;
   if (me.status !== "active") { $("#app").innerHTML = A.statusScreen(me); return; }
-  const TABS = [["audit","سجل العمليات","audit:view"],["settings","الإعدادات والتكامل","settings:manage"]].filter(t => can(t[2]) || (t[0] === "settings" && can("integration:view")));
+  // التبويبات في الشريط الفرعي (app.js): سجل العمليات في «الرئيسية»، والإعدادات والإعلانات في «إدارة البوابة»
+  const TABS = [["audit","سجل العمليات","audit:view"],["settings","الإعدادات والتكامل","settings:manage"],["ann","الإعلانات",null]].filter(t => !t[2] || can(t[2]) || (t[0] === "settings" && can("integration:view")));
   if (!TABS.length) { $("#app").innerHTML = '<div class="alert bad">ليست لديك صلاحيات إدارية.</div>'; return; }
   const AUD = { student: "المتعلم", teacher: "المعلم", administrative: "الهيئة الإدارية", supervisor: "الجهة المشرفة", parent: "ولي الأمر" };
   const ROLE_AR = {}; me.roles.forEach(r => ROLE_AR[r.code] = r.name_ar);
@@ -13,13 +14,18 @@
   const ask = (t) => prompt(t) ;
 
   function shell() {
-    $("#app").innerHTML = `<div class="tabs">${TABS.map(t => `<button data-t="${t[0]}" class="${t[0] === cur ? "on" : ""}">${t[1]}</button>`).join("")}</div><div id="pane"><div class="empty"><span class="spin"></span></div></div>`;
-    document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { cur = b.dataset.t; location.hash = cur; shell(); load(); });
+    $("#app").innerHTML = `<div id="pane"><div class="empty"><span class="spin"></span></div></div>`;
   }
   const rowAcct = (a, extra) => `<tr><td><b>${esc(a.display_name)}</b><div class="hint" dir="ltr" style="text-align:right">${esc(a.login_id)}</div></td><td>${A.TYPE_AR[a.user_type]}</td><td>${badge(a.status)}</td><td>${esc((a.roles || []).map(r => ROLE_AR[r] || r).join("، "))}</td><td>${fmt(a.created_at)}</td><td class="acts">${extra}</td></tr>`;
   const table = (heads, rows) => `<div class="tw"><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows || `<tr><td colspan="${heads.length}" class="empty">لا توجد سجلات.</td></tr>`}</tbody></table></div>`;
 
   const V = {
+    async ann() {   // إعلانات أثر بالأداة الموحدة (لمدير النواة ومنسق أثر في النواة)
+      let ok = false; try { const r = await sb.rpc("portal_can_manage_announcements", { p_scope: "portal", p_system: "athar" }); ok = r && r.data === true; } catch (_) {}
+      if (!ok || !window.PK) { $("#pane").innerHTML = '<div class="alert">إدارة إعلانات أثر لمدير النواة الرقمية ومنسق أثر المسجّل في النواة.</div>'; return; }
+      $("#pane").innerHTML = '<section class="pk-card"><div data-pk="p"></div></section>';
+      PK.announcementsAdmin(document.querySelector('#pane [data-pk="p"]'), { sb, scope: "portal", system: "athar", onChange: () => { const b = document.getElementById("pk-ann"); if (b) b.remove(); PK.mountAnnouncements({ sb, system: "athar", page: "all", before: ".pagebar" }); } });
+    },
     async audit() { $("#pane").innerHTML = `<div class="bar"><input id="q" placeholder="بحث في العمليات"></div><div id="lst"></div>`;
       const go = async () => { const L = await rpc("admin_audit", { p_q: $("#q").value, p_limit: 100 });
         $("#lst").innerHTML = table(["الوقت", "المنفّذ", "العملية", "الكيان", "قبل", "بعد"], L.map(l => `<tr><td>${fmt(l.created_at)}</td><td dir="ltr" style="text-align:right">${esc(l.actor_login || "—")}</td><td>${esc(l.action)}</td><td>${esc(l.entity || "")}</td><td class="hint">${esc(l.before ? JSON.stringify(l.before) : "")}</td><td class="hint">${esc(l.after ? JSON.stringify(l.after) : "")}</td></tr>`).join("")); };

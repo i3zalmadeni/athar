@@ -2,7 +2,7 @@
 (function () {
   const C = window.ATHAR;
   const sb = supabase.createClient(C.supabaseUrl, C.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true } });
-  const ICONS = {
+  const ICONS = { gear: '<path d="M3 6h9M16 6h5M3 12h5M12 12h9M3 18h11M18 18h3"/><circle cx="14" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="16" cy="18" r="2"/>', list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
     users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
     family: '<circle cx="8" cy="7" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M2.5 20c.6-3.4 2.9-5.2 5.5-5.2s4.9 1.8 5.5 5.2M14.5 20c.4-2.4 1.9-3.8 3.7-3.8s3.3 1.4 3.7 3.8"/>',
@@ -75,17 +75,39 @@
       $("#nt").onclick = () => { const o = $("#nv").classList.toggle("open"); $("#nt").setAttribute("aria-expanded", o); };
     } else {
       const act = me.status === "active", sm = act && can("surveys:manage"), adm = act && ["audit:view","settings:manage","integration:view"].some(can);
-      const TABKEY = { "survey.html": "dashboard.html", "survey-results.html": "studies-admin.html", "study.html": sm ? "studies-admin.html" : "dashboard.html", "notifications.html": "dashboard.html" }, on = TABKEY[active] || active;
-      const tabs = [...(me.rv_coord ? [] : [["dashboard.html"]]), ...(sm ? [["surveys-admin.html"], ["studies-admin.html"]] : []), ...(adm ? [["admin.html"]] : [])];
-      const rvHome = tabs[0][0];
-      if (me.rv_coord && active === "dashboard.html") { location.replace(rvHome); return; }   // لوحة المنسق: بلا استباناتي الشخصية
-      if (me.rv_can && !me.rv_coord && ["surveys-admin.html", "studies-admin.html", "admin.html"].includes(active)) { location.replace("dashboard.html"); return; }
+      // نمط لوحة التحكم الموحد: أقسام في الشريط الداكن، وصفحاتها في الشريط الفرعي
+      const canAud = act && can("audit:view"), canSet = act && (can("settings:manage") || can("integration:view")), co = !!me.rv_coord;
+      if (me.rv_can && !co && ["surveys-admin.html", "studies-admin.html", "admin.html"].includes(active)) { location.replace("dashboard.html"); return; }
+      const SECS = [["home", co ? "الرئيسية" : "مكتبي", co ? "grid" : "home", co ? "نظرة شاملة على الاستبانات والدراسات، مع سجل العمليات" : "استباناتك ودراساتك وما يخصك في أثر"],
+        ["work", "الاستبانات والدراسات", "chart", "إنشاء الاستبانات ونشرها، ونتائجها ودراساتها وتوصياتها"],
+        ["admin", "إدارة البوابة", "gear", "إعدادات تُضبط في بداية العام بخطوات مرقمة، وتبقى متاحة للتعديل"]];
+      // [الرابط، الاسم، الأيقونة، الوصف، الظهور، القسم]
+      const NAVS = [["dashboard.html", "نظرة عامة", "grid", "الاستبانات والدراسات وإدارة البوابة في نظرة واحدة", co, "home"],
+        ["admin.html#audit", "سجل العمليات", "list", "كل عملية مسجلة بالمنفّذ والوقت والقيم السابقة والجديدة", co && canAud, "home"],
+        ["dashboard.html", "مكتبي", "home", "استباناتك ودراساتك وما يخصك في أثر", !co, "home"],
+        ["surveys-admin.html", "الاستبانات", "edit", "إنشاء الاستبانات ونشرها وروابطها وإغلاقها", co && sm, "work"],
+        ["studies-admin.html", "الدراسات", "chart", "نتائج الاستبانات الجارية والمغلقة والتقارير والتوصيات", co && sm, "work"],
+        ["admin.html#settings", "الإعدادات والتكامل", "gear", "التكامل مع النواة الرقمية وإعدادات النظام (الحسابات والأدوار تُدار من النواة)", co && canSet, "admin"],
+        ["admin.html#ann", "الإعلانات", "bell", "إعلانات البوابة التي تظهر أعلى لوحة التحكم", co, "admin"]].filter((n) => n[4]);
+      const hk = active === "admin.html" ? "admin.html#" + (location.hash.slice(1) || (canAud ? "audit" : "settings")) : null;
+      const CTX = { "survey.html": "dashboard.html", "survey-results.html": sm && co ? "studies-admin.html" : "dashboard.html", "study.html": sm && co ? "studies-admin.html" : "dashboard.html" };
+      const curN = NAVS.find((n) => n[0] === (hk || CTX[active] || active)), ctxPage = !!CTX[active];
+      const secKey = curN ? curN[5] : null, sec = SECS.find((s) => s[0] === secKey), secItems = (k) => NAVS.filter((n) => n[5] === k);
+      const subs = secKey ? secItems(secKey) : [], hasSub = subs.length > 1 && !ctxPage;
       const cur = PAGES[active], roles = me.roles.map((r) => r.name_ar).join("، ");
+      const pbT = ctxPage ? cur[0] : sec ? (secItems(secKey).length === 1 && secKey !== "home" ? secItems(secKey)[0][1] : sec[1]) : cur[0];
+      const pbD = ctxPage ? cur[2] : hasSub ? sec[3] : curN ? curN[3] : cur[2];
+      const pbI = ctxPage ? (curN ? curN[2] : "grid") : sec ? sec[2] : cur[1];
       $("#hdr").innerHTML = `<header class="dash"><div class="wrap top">${brand("dashboard.html")}<div class="idl"><a class="sitelink" href="index.html">الموقع الإلكتروني</a>${headMoe}</div></div><div class="strip" aria-hidden="true"></div>
         <div class="dnav"><div class="wrap dn"><button type="button" class="dmb" id="dmb" aria-expanded="false" aria-controls="dnavIn">${ico("menu")}<span class="dmb-t">القائمة</span><svg class="dmb-ch" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-        <div class="dnav-in" id="dnavIn">${tabs.map(([h]) => `<a href="${h}" class="${h === on ? "on" : ""}" ${h === on ? 'aria-current="page"' : ""}>${ico(PAGES[h][1])}${PAGES[h][0]}</a>`).join("")}</div>
+        <div class="dnav-in" id="dnavIn">${SECS.filter(([k]) => secItems(k).length).map(([k, n, i, d]) => { const it = secItems(k), on = k === secKey; return `<a href="${it[0][0]}" data-sec="${k}" title="${esc(it.length > 1 ? d : it[0][3])}" class="${on ? "on" : ""}" ${on ? 'aria-current="page"' : ""}>${ico(it.length === 1 && k !== "home" ? it[0][2] : i)}${esc(it.length === 1 && k !== "home" ? it[0][1] : n)}</a>`; }).join("")}</div>
         <div class="dwho">${ubBarHTML(me.display_name, "dashboard.html")}</div></div></div></header>
-        <div class="pagebar"><div class="wrap pb"><div class="pb-t"><small>${esc(roles)}</small><h1>${cur[0]}</h1></div><p class="pb-d">${cur[2]}</p></div></div>`;
+        <div class="pagebar"><div class="wrap pb"><div class="pb-t"><small>${esc(roles)}</small><h1><span class="pb-ic">${ico(pbI)}</span><span>${esc(pbT)}</span></h1></div><p class="pb-d">${esc(pbD)}</p></div></div>
+        ${hasSub ? `<div class="sbar" role="navigation" aria-label="${esc(sec[1])}"><div class="wrap"><div class="subnav">${subs.map((n, i) => { const on = n === curN; return `<a href="${n[0]}" title="${esc(n[3])}" class="${on ? "on" : ""}" ${on ? 'aria-current="page"' : ""}>${ico(n[2])}${secKey === "admin" ? i + 1 + ". " : ""}${esc(n[1])}</a>`; }).join("")}</div></div></div>
+        <div class="wrap shd"><h2>${esc(curN[1])}</h2><p class="sub">${esc(curN[3])}</p></div>` : ""}`;
+      { const ap = $("#app"); if (ap) ap.classList.toggle("solo", !hasSub); const a = $(".sbar a.on"); if (a) a.scrollIntoView({ block: "nearest", inline: "center" }); }
+      document.title = (hasSub ? curN[1] : pbT) + " – أثر";
+      if (active === "admin.html") window.addEventListener("hashchange", () => location.reload());   // تبويبات إدارة البوابة وسجل العمليات بروابط #
       const d = $(".dnav"), b = $("#dmb"); const set = (o) => { d.classList.toggle("open", o); b.setAttribute("aria-expanded", o); };
       b.onclick = (e) => { e.stopPropagation(); set(!d.classList.contains("open")); };
       d.querySelector(".dnav-in").addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
@@ -95,7 +117,7 @@
       const lo = $("#out"); lo.onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("index.html"); };   // الخروج يعيد إلى رئيسية النظام
       // الجرس المنبثق وقائمة الأنظمة والصورة: من شريط المستخدم الموحّد نفسه
       const TONE = { account: "info", link: "warn", system: "info" };
-      if (window.RoleSwitch) RoleSwitch.mount({ sys: "athar", uid: me.rv_uid, can: me.rv_can, view: me.rv_view, home: { coord: (sm ? "surveys-admin.html" : "admin.html"), teacher: "dashboard.html" }, teacherDesc: "استباناتي ودراساتي", coordDesc: "إدارة الاستبانات والدراسات والبوابة" });
+      if (window.RoleSwitch) RoleSwitch.mount({ sys: "athar", uid: me.rv_uid, can: me.rv_can, view: me.rv_view, home: { coord: "dashboard.html", teacher: "dashboard.html" }, teacherDesc: "استباناتي ودراساتي", coordDesc: "إدارة الاستبانات والدراسات والبوابة" });
       ubMount({ key: "athar", uid: me.id, client: sb, allUrl: "notifications.html", load: async () => {
         const L = await rpc("my_notifications", { p_limit: 40 });
         return L.map((n) => ({ id: "n" + n.id, title: n.title, body: n.body, t: n.created_at, read: n.status === "read", tone: TONE[n.kind] || "info", icon: "bell", href: n.link && /^[a-z-]+\.html(\?[\w=&-]+)?(#[a-z]+)?$/.test(n.link) ? n.link : "notifications.html" })); },
