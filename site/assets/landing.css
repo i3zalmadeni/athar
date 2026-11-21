@@ -102,3 +102,40 @@ html:has(.lh),.lh{overflow-x:clip}
 .qlogo img{width:100%;height:100%;border-radius:34px;border:7px solid #fff;box-sizing:border-box;background:#fff;object-fit:contain}
 .qmc-l img{width:100%;height:100%;border-radius:26px;box-shadow:0 14px 28px rgba(12,111,130,.3);background:#fff;object-fit:contain}
 @media(prefers-reduced-motion:reduce){.qbr u:after{animation:none}}
+/* ===== النمط الداكن (مولَّد بـ tools/dark-gen.py — لا تعدّل يدوياً، أعد التوليد) ===== */
+@media (prefers-color-scheme:dark){
+:where(:root:not([data-theme=light])) .qwin{background:#1e3d43}
+:where(:root:not([data-theme=light])) .qchip{background:var(--surface);color:var(--ink)}
+:where(:root:not([data-theme=light])) .qchip .ico{color:#88e7bb}
+:where(:root:not([data-theme=light])) .qchip.b .ico{color:#eac086}
+:where(:root:not([data-theme=light])) .qlogo .qlg{border:7px solid var(--line);background:var(--surface)}
+:where(:root:not([data-theme=light])) .spk{background:var(--gold)}
+:where(:root:not([data-theme=light])) .qmc-in{background:var(--surface,var(--surface))}
+:where(:root:not([data-theme=light])) .tk{background:var(--surface,var(--surface))}
+:where(:root:not([data-theme=light])) .tk:focus-visible{outline:3px solid var(--brand)}
+:where(:root:not([data-theme=light])) .tk-top{background:linear-gradient(145deg,var(--c1),var(--c2));color:#fff}
+:where(:root:not([data-theme=light])) .tk-top:before{border:26px solid rgba(255,255,255,.12)}
+:where(:root:not([data-theme=light])) .tk-perf:before{background:var(--bg)}
+:where(:root:not([data-theme=light])) .tk-perf:after{background:var(--bg)}
+:where(:root:not([data-theme=light])) .tk-bar{background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 11px,var(--ink) 11px 14px,transparent 14px 17px)}
+:where(:root:not([data-theme=light])) .tk-st{color:#88e7bb;background:color-mix(in srgb,var(--surface) 70%,transparent)}
+:where(:root:not([data-theme=light])) .id{background:var(--surface,var(--surface))}
+:where(:root:not([data-theme=light])) .id:before{background:var(--bg)}
+:where(:root:not([data-theme=light])) .id .lan{background:linear-gradient(180deg,rgba(12,111,130,0),#0c6f82 35%,#18a4ab)}
+:where(:root:not([data-theme=light])) .id .av{background:linear-gradient(145deg,#18a4ab,#0c6f82);box-shadow:0 0 0 5px var(--surface),0 0 0 7px color-mix(in srgb,var(--brand) 40%,transparent)}
+:where(:root:not([data-theme=light])) .id .av .ico{color:#fff}
+:where(:root:not([data-theme=light])) .id .ft{background:linear-gradient(90deg,#0c6f82,#18a4ab);color:#fff}
+:where(:root:not([data-theme=light])) .mr-pc{background:var(--surface)}
+:where(:root:not([data-theme=light])) .mr-pc:nth-child(2){border-top-color:var(--gold)}
+:where(:root:not([data-theme=light])) .mr-pc:nth-child(3){border-top-color:var(--ok)}
+:where(:root:not([data-theme=light])) .mr-pc:nth-child(4){border-top-color:var(--navy3)}
+:where(:root:not([data-theme=light])) .mr-gl{background:var(--surface)}
+:where(:root:not([data-theme=light])) .mr-gl:hover{box-shadow:var(--shadow2)}
+:where(:root:not([data-theme=light])) .mr-gn{color:transparent}
+:where(:root:not([data-theme=light])) .qbr i{background:var(--line);color:#86d9ea}
+:where(:root:not([data-theme=light])) .qbr small{color:var(--muted)}
+:where(:root:not([data-theme=light])) .qbr u{background:var(--line)}
+:where(:root:not([data-theme=light])) .qlogo img{border:7px solid var(--line);background:var(--surface)}
+:where(:root:not([data-theme=light])) .qmc-l img{background:var(--surface)}
+}
+/* ===== نهاية النمط الداكن المولَّد ===== */

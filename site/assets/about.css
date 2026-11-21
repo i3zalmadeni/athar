@@ -311,3 +311,70 @@
 @media (max-width:900px){.ah-axes{grid-template-columns:1fr}}
 
 .ah-scale u{display:block;color:#fff;font-size:.72rem;font-weight:800;text-align:center;padding-top:5px;line-height:1}
+/* ===== النمط الداكن (مولَّد بـ tools/dark-gen.py — لا تعدّل يدوياً، أعد التوليد) ===== */
+@media (prefers-color-scheme:dark){
+:where(:root:not([data-theme=light])) .ah-dev{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-bar i{background:var(--line)}
+:where(:root:not([data-theme=light])) .ah-row{background:#1f3d42}
+:where(:root:not([data-theme=light])) .ah-row span{background:#0f8a94}
+:where(:root:not([data-theme=light])) .ah-row em{background:linear-gradient(90deg,#1d3e43,#1e3d43)}
+:where(:root:not([data-theme=light])) .ah-chart{border-top:1px dashed #355a64}
+:where(:root:not([data-theme=light])) .ah-chart i{background:linear-gradient(180deg,#2bb3b8,#0f8a94)}
+:where(:root:not([data-theme=light])) .ah-fly{background:rgba(255,255,255,.18);border:1px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-down{border:2px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-down span{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-what{background:var(--surface);border:1px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-what::before{background:var(--grad)}
+:where(:root:not([data-theme=light])) .ah-eqi i{background:var(--brandsoft)}
+:where(:root:not([data-theme=light])) .ah-p{border:1px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-c{border:1px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-p{background:color-mix(in srgb,var(--bad) 5%,var(--surface))}
+:where(:root:not([data-theme=light])) .ah-c{background:color-mix(in srgb,var(--ok) 7%,var(--surface))}
+:where(:root:not([data-theme=light])) .ah-p i{background:color-mix(in srgb,var(--bad) 13%,var(--surface))}
+:where(:root:not([data-theme=light])) .ah-c i{background:var(--ok)}
+:where(:root:not([data-theme=light])) .ah-arr{background:var(--grad)}
+:where(:root:not([data-theme=light])) .ah-vc{background:var(--surface);border:1px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-vc::after{background:radial-gradient(circle,color-mix(in srgb,var(--brand) 16%,transparent),transparent 70%)}
+:where(:root:not([data-theme=light])) .ah-vc i{background:var(--grad)}
+:where(:root:not([data-theme=light])) .ah-goals span{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-node i{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-node b{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-fl li{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-bt{background:var(--surface);border:1px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-glow2{background:radial-gradient(260px circle at var(--mx) var(--my),color-mix(in srgb,var(--brand) 13%,transparent),transparent 60%)}
+:where(:root:not([data-theme=light])) .ah-bt i{background:var(--brandsoft)}
+:where(:root:not([data-theme=light])) .ah-hub-c{background:var(--grad)}
+:where(:root:not([data-theme=light])) .ah-hn i{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-wl li{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-wl i{background:var(--brandsoft)}
+:where(:root:not([data-theme=light])) .ah-bar2>b{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-sw{background:var(--grad)}
+:where(:root:not([data-theme=light])) .ah-jc{background:var(--surface);border:1px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-jc i{background:var(--grad)}
+:where(:root:not([data-theme=light])) .ah-ly{background:linear-gradient(135deg,color-mix(in srgb,#0b5f73 calc(100% - var(--z)*18%),#2bb3b8),color-mix(in srgb,#0f8a94 calc(100% - var(--z)*15%),#7dd6d2))}
+:where(:root:not([data-theme=light])) .ah-ly i{background:rgba(255,255,255,.18)}
+@media (max-width:700px){:where(:root:not([data-theme=light])) .ah-bar2{background:var(--surface);border:1px solid var(--line)}}
+:where(:root:not([data-theme=light])) .ah-wire span{background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--brand) 35%,transparent) 0 10px,transparent 10px 18px)}
+:where(:root:not([data-theme=light])) .ah-wire i{background:var(--acc2,#f0a530)}
+:where(:root:not([data-theme=light])) .ah-nd{background:var(--surface);border:1px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-ndi i{background:var(--grad);border:6px solid var(--bg,#306069)}
+:where(:root:not([data-theme=light])) .ah-ndi em{background:var(--acc2,#f0a530);border:3px solid var(--surface)}
+:where(:root:not([data-theme=light])) .ah-nd small{color:var(--acc2,#eac486)}
+:where(:root:not([data-theme=light])) .ah-nd p{color:var(--ink2)}
+:where(:root:not([data-theme=light])) .ah-chips span{color:var(--brand2);background:var(--brandsoft)}
+:where(:root:not([data-theme=light])) .ah-sec span{background:color-mix(in srgb,var(--ok) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--ok) 28%,var(--line));color:var(--ink)}
+:where(:root:not([data-theme=light])) .ah .ahb-end>div:first-child{border-color:#6b572e!important}
+:where(:root:not([data-theme=light])) .ah .ahb-end .btn{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-ax2{background:var(--surface);border:1px solid var(--line)}
+:where(:root:not([data-theme=light])) .ah-ax2>i{background:linear-gradient(135deg,var(--brandsoft),var(--surface));color:var(--brand2)}
+:where(:root:not([data-theme=light])) .ah-ax2 p{color:var(--ink2)}
+:where(:root:not([data-theme=light])) .ah-scale u{background:linear-gradient(180deg,var(--brand),#7fd0d4)}
+:where(:root:not([data-theme=light])) .ah-note{background:var(--brandsoft);border:1px dashed color-mix(in srgb,var(--brand) 45%,transparent)}
+:where(:root:not([data-theme=light])) .ah-note p{color:var(--ink2)}
+:where(:root:not([data-theme=light])) .ah-cta{background:var(--hv);background-size:180% 180%}
+:where(:root:not([data-theme=light])) .ah-cta .btn{background:var(--surface)}
+:where(:root:not([data-theme=light])) .ah-cta .btn.ghost{background:rgba(255,255,255,.12);border-color:var(--line)}
+:where(:root:not([data-theme=light])) .wrow .wl small{color:var(--muted)}
+:where(:root:not([data-theme=light])) .ah-scale u{color:#fff}
+}
+/* ===== نهاية النمط الداكن المولَّد ===== */
